@@ -30,7 +30,7 @@ be factual and sourced — the deleted one compared Lumyx to a "typical Go SFU s
 nobody had verified.
 
 The remaining items are called out in the design spec's own risk section — see
-`docs/superpowers/specs/2026-08-30-sightline-marketing-site-design.md` §12 — which makes
+`docs/superpowers/specs/2026-08-30-lumyx-marketing-site-design.md` §12 — which makes
 "must not be deployed publicly" the headline risk of this branch. Confirm the numbers and claims
 above against the real implementation before this site goes live anywhere public.
 
