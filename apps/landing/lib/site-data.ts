@@ -29,18 +29,6 @@ export const START = {
     ],
     note: "Free tier: 10,000 participant-minutes/month, no card required.",
   },
-  livekit: {
-    title: "Migrate from LiveKit",
-    lines: [
-      "- url: wss://my-app.livekit.cloud",
-      "+ url: wss://live-classroom.eu-west-3.lumyx.cloud/ws",
-      "",
-      "// client code unchanged",
-      "const room = new Room();",
-      "await room.connect(url, token);",
-    ],
-    note: "Signaling messages and token grants are compatible. Your SDKs stay put.",
-  },
 } as const;
 
 export type StartKey = keyof typeof START;
@@ -49,7 +37,6 @@ export const START_TABS: { id: StartKey; label: string }[] = [
   { id: "docker", label: "docker run" },
   { id: "cargo", label: "cargo" },
   { id: "cloud", label: "Cloud" },
-  { id: "livekit", label: "From LiveKit" },
 ];
 
 export const MARQUEE = [
@@ -113,13 +100,6 @@ export const TOPO_LEGEND = [
   { title: "Dashed red edge", body: "TURN relay, ICE degraded — d41f9ab7 pays 212ms of RTT." },
   { title: "Tinted node", body: "A threshold is crossed on that peer: amber approaching, red breached." },
   { title: "Travelling pulse", body: "What the SFU is forwarding right now, per peer." },
-];
-
-export const COMPARE_ROWS = [
-  { label: "Self-hosted footprint", ours: "One static binary", theirs: "SFU + signaling + Redis" },
-  { label: "Observability", ours: "Built in, per peer and per room", theirs: "Bring your own Grafana" },
-  { label: "Media path", ours: "Rust — no GC, no CGO", theirs: "Go, with CGO for media libs" },
-  { label: "Product focus", ours: "Real-time video products", theirs: "AI voice agents first" },
 ];
 
 export type Plan = {

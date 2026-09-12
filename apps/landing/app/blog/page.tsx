@@ -22,21 +22,27 @@ export default function BlogIndexPage() {
             title="Lumyx is in active development"
             body="Core video forwarding stability and third-party production usage aren't validated yet."
           />
-          <div className="flex flex-col">
-            {posts.map((p, i) => (
-              <Link
-                key={p.slug}
-                href={`/blog/${p.slug}`}
-                className={`flex flex-col gap-2 border-t border-subtle py-6 no-underline hover:no-underline ${
-                  i === posts.length - 1 ? "border-b" : ""
-                }`}
-              >
-                <span className="sl-num text-12 text-faint">{p.date}</span>
-                <span className="text-[19px] font-semibold tracking-[-0.02em] text-strong">{p.title}</span>
-                <span className="text-13 leading-relaxed text-muted text-pretty">{p.description}</span>
-              </Link>
-            ))}
-          </div>
+          {posts.length === 0 ? (
+            <p className="max-w-[680px] border-y border-subtle py-6 text-13 leading-relaxed text-muted text-pretty">
+              No posts yet. Build notes will land here as the SFU moves through its milestones.
+            </p>
+          ) : (
+            <div className="flex flex-col">
+              {posts.map((p, i) => (
+                <Link
+                  key={p.slug}
+                  href={`/blog/${p.slug}`}
+                  className={`flex flex-col gap-2 border-t border-subtle py-6 no-underline hover:no-underline ${
+                    i === posts.length - 1 ? "border-b" : ""
+                  }`}
+                >
+                  <span className="sl-num text-12 text-faint">{p.date}</span>
+                  <span className="text-[19px] font-semibold tracking-[-0.02em] text-strong">{p.title}</span>
+                  <span className="text-13 leading-relaxed text-muted text-pretty">{p.description}</span>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </SiteFrame>

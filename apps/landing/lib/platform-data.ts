@@ -147,8 +147,8 @@ export const NO_LIST = [
     body: "The forwarder is the collector. Metrics exist because the packets passed through it.",
   },
   {
-    title: "No migration",
-    body: "Same client SDKs and signaling as LiveKit. Point the URL at Lumyx and deploy.",
+    title: "No rebuild",
+    body: "The per-participant quality view is part of the SFU, not a pipeline you assemble on top of it.",
   },
 ];
 
