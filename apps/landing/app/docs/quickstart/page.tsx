@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Card, CardContent } from '@lumyx/ui';
 import { DocsLayout, DocSection, CodeBlock } from "@/components/site/docs-layout";
+import { REPO } from "@/lib/site-data";
 
 export default function QuickstartPage() {
   return (
@@ -38,8 +39,9 @@ export default function QuickstartPage() {
 
       <DocSection id="connect" title="Connect a client">
         <p className="max-w-[680px] text-14 leading-relaxed text-body text-pretty">
-          Client SDKs and signaling messages match LiveKit&apos;s, so the same room object works — only the URL
-          changes.
+          A client opens a WebSocket to the signaling endpoint and exchanges offer, answer and ICE candidates as
+          JSON. The message names and payloads are specified in the{" "}
+          <a href={REPO}>repository README</a>.
         </p>
         <CodeBlock
           lines={[

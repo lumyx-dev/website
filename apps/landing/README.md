@@ -1,20 +1,22 @@
 # @lumyx/web
 
-The Lumyx marketing site — the public pages (home, pricing, comparison, docs, changelog,
-sign up). A Next.js App Router app that consumes the shared `@lumyx/ui` component and token
-library for all of its UI.
+The Lumyx marketing site — the public pages (home, pricing, docs, changelog, blog, sign up).
+A Next.js App Router app that consumes the shared `@lumyx/ui` component and token library for
+all of its UI.
 
 ## Not production content
 
 **This app must not be deployed publicly yet.** It builds and runs cleanly, but a large share of
 what it says has not been verified against the actual product:
 
-- **The whole positioning is out of date.** This site was written when Lumyx was pitched as a
-  drop-in LiveKit replacement — `/compare`, the "From LiveKit" migration guide, the
-  `livekit-pivoted-to-ai-agents` blog post, "Drop-in LiveKit signaling" on `/signup` and the
-  footer's "vs LiveKit" all predate the repositioning against the low-level SFU toolkits
-  (mediasoup, Janus, ion-sfu). The signaling-compatibility claims are also not backed by the SFU:
-  the protocol is Lumyx's own JSON, not LiveKit's. Rewriting this is tracked separately.
+- ~~**The whole positioning is out of date.**~~ **Fixed (LUM-701).** This site was written when
+  Lumyx was pitched as a drop-in LiveKit replacement. All of that content is gone: the `/compare`
+  page, the "From LiveKit" quickstart tab, the "Migrating" docs nav group, the
+  `livekit-pivoted-to-ai-agents` blog post, and every signaling- or SDK-compatibility claim. Those
+  claims were never backed by the SFU — the protocol is Lumyx's own JSON, documented in the root
+  README — so the pages now describe that protocol instead. The positioning is the root README's:
+  observability in the media path, against the low-level SFU toolkits (mediasoup, Janus, ion-sfu).
+  Side effect: `/blog` has no posts left and renders an empty state.
 - **Pricing** (`lib/site-data.ts`, `app/pricing/`) — plans, quotas, billing units and prices come
   from a design proposal made without access to the Cloud repo.
 - **Benchmarks** (`lib/platform-data.ts`) — figures are illustrative, not measured.
@@ -23,11 +25,11 @@ what it says has not been verified against the actual product:
 - **The metrics reference** (`lib/docs-data.ts`, `/docs`) — the six metrics and thresholds
   documented there do not exist in `apps/sfu/src` today; the README there marks them
   "Planned — next milestone."
-- **The comparison claims** (`app/compare/`, `lib/site-data.ts`) — including a full column
-  of claims about LiveKit, a named third party's product, which is an unverified
-  characterisation and carries real reputational and legal risk if published as-is.
+A comparison page against mediasoup, Janus and ion-sfu is tracked separately (LUM-631) and must
+be factual and sourced — the deleted one compared Lumyx to a "typical Go SFU stack" on claims
+nobody had verified.
 
-Every one of these is called out in the design spec's own risk section — see
+The remaining items are called out in the design spec's own risk section — see
 `docs/superpowers/specs/2026-08-30-sightline-marketing-site-design.md` §12 — which makes
 "must not be deployed publicly" the headline risk of this branch. Confirm the numbers and claims
 above against the real implementation before this site goes live anywhere public.

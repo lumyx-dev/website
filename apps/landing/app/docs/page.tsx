@@ -28,8 +28,8 @@ export default function DocsIntroductionPage() {
         <p className="max-w-[680px] text-14 leading-relaxed text-body text-pretty">
           Lumyx is a selective forwarding unit (SFU) for real-time video and audio: it terminates ICE, DTLS and SRTP
           from every peer in a room and forwards each publisher&apos;s tracks to the subscribers who need them,
-          without transcoding. Client SDKs and signaling messages are compatible with LiveKit, so most apps switch
-          by changing a URL.
+          without transcoding. Clients drive it over a WebSocket with Lumyx&apos;s own JSON signaling protocol,
+          specified in the <a href={REPO}>repository README</a>.
         </p>
         <p className="max-w-[680px] text-14 leading-relaxed text-body text-pretty">
           What sets it apart is the second job it does on the same packets: a metrics collector sits in the media

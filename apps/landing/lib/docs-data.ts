@@ -66,10 +66,6 @@ export const DOC_NAV: DocNavSection[] = [
     { id: "replay", label: "Session replay" },
     { id: "prometheus", label: "Prometheus endpoint" },
   ]},
-  { title: "Migrating", items: [
-    { id: "livekit", label: "From LiveKit" },
-    { id: "tokens", label: "Token compatibility" },
-  ]},
   { title: "Reference", items: [
     { id: "api", label: "REST API" },
     { id: "config", label: "Configuration" },
@@ -110,10 +106,10 @@ export const RELEASES = [
   },
   {
     version: "v0.3.8", date: "29 Jul 2026", commit: "c27ad93", latest: false,
-    summary: "Signaling compatibility work. LiveKit token grants and message names are now accepted verbatim, which makes the migration a one-line change.",
+    summary: "Signaling hardening: token grants are checked per room and per capability, and webhook deliveries are now signed.",
     groups: [
       { kind: "Added", tone: "ok" as const, items: [
-        "LiveKit-compatible token grants: publish, subscribe, publishData, roomAdmin.",
+        "Token grants scoped per capability: publish, subscribe, publishData, roomAdmin.",
         "Signed webhooks for room.* and alert.* events, with delivery failures surfaced in Alerts.",
       ]},
       { kind: "Fixed", tone: "neutral" as const, items: [
