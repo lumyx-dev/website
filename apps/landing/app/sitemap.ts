@@ -14,7 +14,6 @@ const STATIC_ROUTES: Array<{
   { path: "/compare", changeFrequency: "monthly", priority: 0.6 },
   { path: "/changelog", changeFrequency: "weekly", priority: 0.5 },
   { path: "/blog", changeFrequency: "weekly", priority: 0.7 },
-  { path: "/signup", changeFrequency: "yearly", priority: 0.3 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

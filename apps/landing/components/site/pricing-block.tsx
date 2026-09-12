@@ -2,7 +2,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Button, Badge, Tabs, TabsList, TabsTrigger } from '@lumyx/ui';
-import { PLANS, PRICING_FAQ } from "@/lib/site-data";
+import { PLANS, PRICING_FAQ, REPO } from "@/lib/site-data";
 
 export function PricingBlock() {
   const [period, setPeriod] = React.useState<"monthly" | "annual">("monthly");
@@ -53,7 +53,7 @@ export function PricingBlock() {
             </div>
             <span className="flex-1" />
             <Button size="sm" variant={pl.variant} className="w-full" asChild>
-              <Link href={pl.cta === "Contact us" ? "#" : "/signup"} className="no-underline hover:no-underline">{pl.cta}</Link>
+              <Link href={pl.cta === "Contact us" ? `${REPO}/discussions` : "/docs/quickstart"} className="no-underline hover:no-underline">{pl.cta}</Link>
             </Button>
           </div>
         ))}
@@ -67,8 +67,8 @@ export function PricingBlock() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3.5">
-        <Button variant="primary" asChild><Link href="/signup" className="no-underline hover:no-underline">Get started free</Link></Button>
-        <Button>Talk to us about Business</Button>
+        <Button variant="primary" asChild><Link href="/docs/quickstart" className="no-underline hover:no-underline">Get started</Link></Button>
+        <Button asChild><a href={`${REPO}/discussions`} className="no-underline hover:no-underline">Talk to us about Business</a></Button>
         <span className="flex-1" />
         <Link href="/pricing" className="text-13 font-medium">Full plan comparison →</Link>
       </div>

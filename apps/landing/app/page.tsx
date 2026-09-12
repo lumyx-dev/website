@@ -40,11 +40,8 @@ export default function HomePage() {
         </nav>
         <span className="flex-1" />
         <ThemeToggle />
-        <Link href="/signup" className="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">
-          Sign in
-        </Link>
         <Button size="sm" variant="primary" asChild>
-          <Link href="/signup" className="no-underline hover:no-underline">Start free</Link>
+          <Link href="/docs/quickstart" className="no-underline hover:no-underline">Get started</Link>
         </Button>
       </header>
 
@@ -71,7 +68,7 @@ export default function HomePage() {
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <Button size="lg" variant="primary" asChild>
-            <Link href="/signup" className="no-underline hover:no-underline">Start building now</Link>
+            <Link href="/docs/quickstart" className="no-underline hover:no-underline">Start building now</Link>
           </Button>
           <a
             href={REPO}
@@ -115,7 +112,7 @@ export default function HomePage() {
       </section>
 
       {/* The platform, in three shown promises. */}
-      <section className="flex flex-col gap-2 px-8 pb-2 pt-16">
+      <section id="why" className="flex flex-col gap-2 px-8 pb-2 pt-16">
         <span className="sl-label text-accent-text">The platform</span>
         <h2 className="max-w-155 text-[40px] font-semibold leading-[1.06] tracking-[-0.035em] text-strong text-balance">
           Three things, each one you&rsquo;d otherwise build yourself
@@ -193,11 +190,11 @@ export default function HomePage() {
               <span className="flex-1" />
               {t.featured ? (
                 <Button variant="primary" asChild>
-                  <Link href="/signup" className="no-underline hover:no-underline">{t.cta}</Link>
+                  <Link href="/docs/quickstart" className="no-underline hover:no-underline">{t.cta}</Link>
                 </Button>
               ) : (
                 <Button variant="secondary" asChild>
-                  <Link href="/signup" className="no-underline hover:no-underline">{t.cta}</Link>
+                  <Link href="/docs/quickstart" className="no-underline hover:no-underline">{t.cta}</Link>
                 </Button>
               )}
             </Card>
@@ -218,7 +215,7 @@ export default function HomePage() {
           </h2>
           <div className="flex flex-wrap items-center gap-3">
             <Button size="lg" variant="primary" asChild>
-              <Link href="/signup" className="no-underline hover:no-underline">Get started free</Link>
+              <Link href="/docs/quickstart" className="no-underline hover:no-underline">Get started</Link>
             </Button>
             <Link href="/docs" className="text-[13.5px] text-muted no-underline hover:text-strong hover:no-underline">
               Read the docs

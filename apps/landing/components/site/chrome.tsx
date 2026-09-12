@@ -9,8 +9,7 @@ function Mark({ size = 20 }: { size?: number }) {
 
 const NAV = [
   { href: "/#why", label: "Why Lumyx" },
-  { href: "/#observability", label: "Observability" },
-  { href: "/compare", label: "vs LiveKit" },
+  { href: "/#platform", label: "Observability" },
   { href: "/pricing", label: "Pricing" },
   { href: "/docs", label: "Docs" },
   { href: "/blog", label: "Blog" },
@@ -37,7 +36,7 @@ export function SiteHeader() {
         <a href={REPO} className="inline-flex h-8 items-center rounded-sm border border-hairline px-3 text-[12.5px] text-body no-underline hover:bg-hover hover:no-underline">
           GitHub
         </a>
-        <Button size="sm" variant="primary" asChild><Link href="/signup" className="no-underline hover:no-underline">Get started free</Link></Button>
+        <Button size="sm" variant="primary" asChild><Link href="/docs/quickstart" className="no-underline hover:no-underline">Get started</Link></Button>
       </div>
     </header>
   );
@@ -59,9 +58,13 @@ export function SiteFooter() {
         {FOOTER_COLS.map((col) => (
           <div key={col.title} className="flex flex-col gap-2.5">
             <span className="sl-label">{col.title}</span>
-            {col.links.map((l) => (
-              <a key={l} href="#" className="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">{l}</a>
-            ))}
+            {col.links.map((l) =>
+              l.href.startsWith("/") ? (
+                <Link key={l.label} href={l.href} className="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">{l.label}</Link>
+              ) : (
+                <a key={l.label} href={l.href} className="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">{l.label}</a>
+              )
+            )}
           </div>
         ))}
       </div>
