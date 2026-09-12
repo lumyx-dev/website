@@ -71,7 +71,7 @@ export default function ComparePage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Button variant="primary" asChild><Link href="/signup" className="no-underline hover:no-underline">Get started free</Link></Button>
+              <Button variant="primary" asChild><Link href="/docs/quickstart" className="no-underline hover:no-underline">Get started</Link></Button>
               <Button asChild><Link href="/docs" className="no-underline hover:no-underline">Read the docs</Link></Button>
             </div>
           </div>

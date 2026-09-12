@@ -182,11 +182,50 @@ export const PRICING_FAQ = [
   { q: "Can I move from Cloud back to self-hosted?", a: "Yes. Same signaling, same token grants: point your clients at your own URL. Metrics history can be exported as CSV before you leave." },
 ];
 
-export const FOOTER_COLS = [
-  { title: "Product", links: ["Observability", "Alerting", "Session replay", "Cloud console"] },
-  { title: "Developers", links: ["Docs", "Metrics reference", "API", "SDKs", "Changelog"] },
-  { title: "Open source", links: ["GitHub", "Roadmap", "Contributing", "Benchmarks", "License"] },
-  { title: "Company", links: ["Pricing", "vs LiveKit", "Status", "Blog", "Contact"] },
+/**
+ * Every entry resolves to a page that exists — internal routes start with "/",
+ * everything else is an absolute URL. Entries that named unbuilt features
+ * (alerting, session replay, API, SDKs, benchmarks, status) were removed rather
+ * than pointed somewhere plausible: the README marks them as not built, so a
+ * footer link to them is a promise the product does not keep.
+ */
+export const FOOTER_COLS: Array<{
+  title: string;
+  links: Array<{ label: string; href: string }>;
+}> = [
+  {
+    title: "Product",
+    links: [
+      { label: "Observability", href: "/#platform" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Lumyx Cloud", href: "/docs/cloud" },
+    ],
+  },
+  {
+    title: "Developers",
+    links: [
+      { label: "Docs", href: "/docs" },
+      { label: "Quickstart", href: "/docs/quickstart" },
+      { label: "Self-hosting", href: "/docs/self-hosting" },
+      { label: "Metrics reference", href: "/docs/metrics-reference" },
+    ],
+  },
+  {
+    title: "Open source",
+    links: [
+      { label: "GitHub", href: REPO },
+      { label: "Discussions", href: `${REPO}/discussions` },
+      { label: "Contributing", href: `${REPO}/blob/main/CONTRIBUTING.md` },
+      { label: "License", href: `${REPO}/blob/main/LICENSE` },
+    ],
+  },
+  {
+    title: "Updates",
+    links: [
+      { label: "Blog", href: "/blog" },
+      { label: "Changelog", href: "/changelog" },
+    ],
+  },
 ];
 
 /** Deterministic mock series — same shape the design files used. */
