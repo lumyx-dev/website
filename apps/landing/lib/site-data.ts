@@ -177,7 +177,8 @@ export const FOOTER_COLS: Array<{
     title: "Product",
     links: [
       { label: "Observability", href: "/#platform" },
-      { label: "Pricing", href: "/pricing" },
+      // Route desactivee (app/_pricing).
+      // { label: "Pricing", href: "/pricing" },
       { label: "Lumyx Cloud", href: "/docs/cloud" },
     ],
   },
@@ -199,13 +200,14 @@ export const FOOTER_COLS: Array<{
       { label: "License", href: `${REPO}/blob/main/LICENSE` },
     ],
   },
-  {
-    title: "Updates",
-    links: [
-      { label: "Blog", href: "/blog" },
-      { label: "Changelog", href: "/changelog" },
-    ],
-  },
+  // Colonne Updates masquee avec les routes app/_blog et app/_changelog.
+  // {
+  //   title: "Updates",
+  //   links: [
+  //     { label: "Blog", href: "/blog" },
+  //     { label: "Changelog", href: "/changelog" },
+  //   ],
+  // },
 ];
 
 /** Deterministic mock series — same shape the design files used. */

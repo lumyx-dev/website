@@ -1,3 +1,10 @@
+/**
+ * Route desactivee — le dossier est prefixe `_`, donc Next l'exclut du routage
+ * (private folder). Le code reste intact : renommer `_blog/[slug]` -> `blog/[slug]` pour la
+ * remettre en ligne, et decommenter les liens correspondants dans
+ * app/page.tsx (NAV), components/site/chrome.tsx (NAV), lib/site-data.ts
+ * (FOOTER_COLS) et app/sitemap.ts.
+ */
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { AlertBanner } from '@lumyx/ui';
