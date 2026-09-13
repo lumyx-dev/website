@@ -1,11 +1,11 @@
 import type { NextConfig } from 'next';
-import path from 'node:path';
 
 const nextConfig: NextConfig = {
+  // @lumyx/ui exporte du TypeScript source, pas un build — Next le transpile.
   transpilePackages: ['@lumyx/ui'],
-  turbopack: {
-    root: path.join(__dirname, "..", ".."),
-  },
+  env: {
+    CLOUD_APP_URL: process.env.CLOUD_APP_URL
+  }
 };
 
 export default nextConfig;
