@@ -65,10 +65,12 @@ export default function CloudPage() {
             </TableBody>
           </Table>
         </Card>
+        {/* Renvoi vers /pricing masque avec la route app/_pricing.
         <p className="max-w-[680px] text-13 text-muted text-pretty">
           Full feature-by-feature breakdown, including egress, retention and support SLAs, is on{" "}
           <Link href="/pricing" className="text-accent no-underline hover:no-underline">Pricing</Link>.
         </p>
+        */}
       </DocSection>
 
       <DocSection id="moving" title="Moving between Cloud and self-hosted">

@@ -10,9 +10,10 @@ function Mark({ size = 20 }: { size?: number }) {
 const NAV = [
   { href: "/#why", label: "Why Lumyx" },
   { href: "/#platform", label: "Observability" },
-  { href: "/pricing", label: "Pricing" },
+  // Routes desactivees (app/_pricing, app/_blog).
+  // { href: "/pricing", label: "Pricing" },
   { href: "/docs", label: "Docs" },
-  { href: "/blog", label: "Blog" },
+  // { href: "/blog", label: "Blog" },
 ];
 
 export function SiteHeader() {
