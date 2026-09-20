@@ -1,5 +1,9 @@
 export const VERSION = "v0.4.1";
 export const REPO = "https://github.com/FrekiManagarm/lumyx";
+// La documentation vit sur son propre sous-domaine (apps/docs). Tous les liens vers
+// elle passent par cette constante, pour qu'aucun clic ne traverse la redirection
+// declaree dans next.config.ts.
+export const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL ?? "https://docs.lumyx.dev";
 
 export const START = {
   docker: {
@@ -179,16 +183,16 @@ export const FOOTER_COLS: Array<{
       { label: "Observability", href: "/#platform" },
       // Route desactivee (app/_pricing).
       // { label: "Pricing", href: "/pricing" },
-      { label: "Lumyx Cloud", href: "/docs/cloud" },
+      { label: "Lumyx Cloud", href: `${DOCS_URL}/cloud` },
     ],
   },
   {
     title: "Developers",
     links: [
-      { label: "Docs", href: "/docs" },
-      { label: "Quickstart", href: "/docs/quickstart" },
-      { label: "Self-hosting", href: "/docs/self-hosting" },
-      { label: "Metrics reference", href: "/docs/metrics-reference" },
+      { label: "Docs", href: DOCS_URL },
+      { label: "Quickstart", href: `${DOCS_URL}/quickstart` },
+      { label: "Self-hosting", href: `${DOCS_URL}/self-hosting` },
+      { label: "Metrics reference", href: `${DOCS_URL}/metrics-reference` },
     ],
   },
   {
