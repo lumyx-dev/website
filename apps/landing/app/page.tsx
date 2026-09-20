@@ -5,13 +5,14 @@ import { CodePanel } from "@/components/site/code-panel";
 import { PlatformBento } from "@/components/site/platform-bento";
 // TIERS revient avec la section Pricing, plus bas, quand on la reaffiche.
 import { CONFIG_STEPS, FEATURE_GROUPS, NO_LIST } from "@/lib/platform-data";
-import { REPO } from "@/lib/site-data";
+import { DOCS_URL, REPO } from "@/lib/site-data";
 import { organizationJsonLd, softwareApplicationJsonLd } from "@/lib/schema";
 
 const NAV = [
   { href: "/", label: "Product" },
   { href: "/#platform", label: "Observability" },
-  { href: "/docs", label: "Docs" },
+  // La doc est hors origine : l'entree part vers docs.lumyx.dev, pas vers /docs.
+  { href: DOCS_URL, label: "Docs" },
   // Routes desactivees (app/_blog, app/_pricing, app/_changelog).
   // { href: "/blog", label: "Blog" },
   // { href: "/pricing", label: "Pricing" },
@@ -35,16 +36,22 @@ export default function HomePage() {
             <span className="text-[15px] font-semibold tracking-[-0.02em] text-strong">Lumyx</span>
           </Link>
           <nav className="hidden items-center gap-5 md:flex">
-            {NAV.map((n) => (
-              <Link key={n.label} href={n.href} className="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">
-                {n.label}
-              </Link>
-            ))}
+            {NAV.map((n) =>
+              n.href.startsWith("/") ? (
+                <Link key={n.label} href={n.href} className="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">
+                  {n.label}
+                </Link>
+              ) : (
+                <a key={n.label} href={n.href} className="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">
+                  {n.label}
+                </a>
+              )
+            )}
           </nav>
           <span className="flex-1" />
           <ThemeToggle />
           <Button size="sm" variant="primary" asChild>
-            <Link href="/docs/quickstart" className="no-underline hover:no-underline">Get started</Link>
+            <a href={`${DOCS_URL}/quickstart`} className="no-underline hover:no-underline">Get started</a>
           </Button>
         </div>
       </header>
@@ -72,7 +79,7 @@ export default function HomePage() {
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <Button size="lg" variant="primary" asChild>
-            <Link href="/docs/quickstart" className="no-underline hover:no-underline">Start building now</Link>
+            <a href={`${DOCS_URL}/quickstart`} className="no-underline hover:no-underline">Start building now</a>
           </Button>
           <a
             href={REPO}
@@ -111,7 +118,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <Link href="/docs" className="text-[13.5px] font-medium">Read the configuration reference</Link>
+            <a href={DOCS_URL} className="text-[13.5px] font-medium">Read the configuration reference</a>
           </div>
         </div>
       </section>
@@ -151,7 +158,7 @@ export default function HomePage() {
             <h2 className="text-[30px] font-semibold leading-[1.1] tracking-[-0.03em] text-strong">
               Everything else that ships with it
             </h2>
-            <Link href="/docs" className="text-[13.5px] font-medium">View all features</Link>
+            <a href={DOCS_URL} className="text-[13.5px] font-medium">View all features</a>
           </div>
 
           <div className="flex flex-col">
@@ -163,13 +170,13 @@ export default function HomePage() {
                 <span className="sl-label text-faint">{g.group}</span>
                 <div className="flex flex-wrap gap-2">
                   {g.items.map((item) => (
-                    <Link
+                    <a
                       key={item}
-                      href="/docs"
+                      href={DOCS_URL}
                       className="inline-flex min-h-7.5 flex-none items-center whitespace-nowrap rounded-pill border border-hairline bg-card px-3 py-1.5 text-13 text-body no-underline hover:border-stroke hover:text-strong hover:no-underline"
                     >
                       {item}
-                    </Link>
+                    </a>
                   ))}
                 </div>
               </div>
@@ -205,11 +212,11 @@ export default function HomePage() {
                 <span className="flex-1" />
                 {t.featured ? (
                   <Button variant="primary" asChild>
-                    <Link href="/docs/quickstart" className="no-underline hover:no-underline">{t.cta}</Link>
+                    <a href={`${DOCS_URL}/quickstart`} className="no-underline hover:no-underline">{t.cta}</a>
                   </Button>
                 ) : (
                   <Button variant="secondary" asChild>
-                    <Link href="/docs/quickstart" className="no-underline hover:no-underline">{t.cta}</Link>
+                    <a href={`${DOCS_URL}/quickstart`} className="no-underline hover:no-underline">{t.cta}</a>
                   </Button>
                 )}
               </Card>
@@ -234,11 +241,11 @@ export default function HomePage() {
             </h2>
             <div className="flex flex-wrap items-center gap-3">
               <Button size="lg" variant="primary" asChild>
-                <Link href="/docs/quickstart" className="no-underline hover:no-underline">Get started</Link>
+                <a href={`${DOCS_URL}/quickstart`} className="no-underline hover:no-underline">Get started</a>
               </Button>
-              <Link href="/docs" className="text-[13.5px] text-muted no-underline hover:text-strong hover:no-underline">
+              <a href={DOCS_URL} className="text-[13.5px] text-muted no-underline hover:text-strong hover:no-underline">
                 Read the docs
-              </Link>
+              </a>
             </div>
           </div>
 

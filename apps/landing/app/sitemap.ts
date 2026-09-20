@@ -10,7 +10,7 @@ const STATIC_ROUTES: Array<{
   priority: number;
 }> = [
   { path: "", changeFrequency: "weekly", priority: 1 },
-  { path: "/docs", changeFrequency: "weekly", priority: 0.8 },
+  // /docs a demenage sur docs.lumyx.dev, qui porte son propre sitemap.
   // Routes desactivees (app/_pricing, app/_changelog, app/_blog) — pas d'URL morte dans le sitemap.
   // { path: "/pricing", changeFrequency: "monthly", priority: 0.8 },
   // { path: "/changelog", changeFrequency: "weekly", priority: 0.5 },

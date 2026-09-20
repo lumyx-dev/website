@@ -22,9 +22,9 @@ what it says has not been verified against the actual product:
 - **Benchmarks** (`lib/platform-data.ts`) — figures are illustrative, not measured.
 - **Releases** (`app/changelog/`) — changelog entries were authored for the design handoff,
   not pulled from an actual release history.
-- **The metrics reference** (`lib/docs-data.ts`, `/docs`) — the six metrics and thresholds
-  documented there do not exist in `apps/sfu/src` today; the README there marks them
-  "Planned — next milestone."
+- **The metrics reference** — la doc a demenage sur `docs.lumyx.dev` (`apps/docs`), et cette
+  app la redirige. Les six metriques et seuils qu'elle documente n'existent pas dans
+  `apps/sfu/src` aujourd'hui ; le README la-bas les marque "Planned — next milestone."
 A comparison page against mediasoup, Janus and ion-sfu is tracked separately (LUM-631) and must
 be factual and sourced — the deleted one compared Lumyx to a "typical Go SFU stack" on claims
 nobody had verified.
@@ -47,7 +47,7 @@ Open [http://localhost:3002](http://localhost:3002) to see it.
 
 ## Notes
 
-- Content lives under `lib/` (e.g. `lib/site-data.ts`, `lib/docs-data.ts`) rather than
-  hardcoded in components.
+- Content lives under `lib/` (e.g. `lib/site-data.ts`, `lib/docs-data.ts` qui ne porte plus
+  que `RELEASES`) rather than hardcoded in components.
 - `scripts/verify-ds.mjs` checks this app's CSS/markup against the design system's tokens —
   run it with `bun run verify:ds`.
