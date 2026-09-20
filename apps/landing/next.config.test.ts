@@ -1,7 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import config from "./next.config";
 
-const DOCS = "https://docs.lumyx.dev";
+// Meme expression que next.config.ts, et non un domaine ecrit en dur : les redirections se
+// construisent sur NEXT_PUBLIC_DOCS_URL. Un litteral faisait rougir la suite des qu'on lui donnait
+// une URL de preview, un domaine de staging ou un localhost — c'est-a-dire exactement quand on a
+// besoin qu'elle soit lisible.
+const DOCS = process.env.NEXT_PUBLIC_DOCS_URL ?? "https://docs.lumyx.dev";
 
 describe("redirections de /docs vers le sous-domaine", () => {
   test("declare une fonction redirects", () => {
