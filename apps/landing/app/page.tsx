@@ -264,7 +264,7 @@ export default function HomePage() {
             <span className="text-13 leading-relaxed text-muted">
               MIT licensed, one binary, no metering and no account required.
             </span>
-            <a href={REPO} className="text-13 font-medium">Self-hosting docs</a>
+            <a href={`${DOCS_URL}/self-hosting`} className="text-13 font-medium">Self-hosting docs</a>
           </Card>
         </div>
       </section>
