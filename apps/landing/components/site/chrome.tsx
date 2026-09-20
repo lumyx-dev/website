@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button, StatusDot, LumyxMark } from '@lumyx/ui';
-import { FOOTER_COLS, VERSION, REPO } from "@/lib/site-data";
+import { DOCS_URL, FOOTER_COLS, VERSION, REPO } from "@/lib/site-data";
 import { ThemeToggle } from "./theme-toggle";
 
 function Mark({ size = 20 }: { size?: number }) {
@@ -12,7 +12,8 @@ const NAV = [
   { href: "/#platform", label: "Observability" },
   // Routes desactivees (app/_pricing, app/_blog).
   // { href: "/pricing", label: "Pricing" },
-  { href: "/docs", label: "Docs" },
+  // La doc est hors origine : l'entree part vers docs.lumyx.dev, pas vers /docs.
+  { href: DOCS_URL, label: "Docs" },
   // { href: "/blog", label: "Blog" },
 ];
 
@@ -25,11 +26,17 @@ export function SiteHeader() {
           <span className="text-[15px] font-semibold tracking-[-0.02em] text-strong">Lumyx</span>
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">
-              {n.label}
-            </Link>
-          ))}
+          {NAV.map((n) =>
+            n.href.startsWith("/") ? (
+              <Link key={n.href} href={n.href} className="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">
+                {n.label}
+              </Link>
+            ) : (
+              <a key={n.href} href={n.href} className="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">
+                {n.label}
+              </a>
+            )
+          )}
         </nav>
         <span className="flex-1" />
         <span className="sl-num hidden text-12 text-faint sm:inline">{VERSION}</span>
@@ -37,7 +44,7 @@ export function SiteHeader() {
         <a href={REPO} className="inline-flex h-8 items-center rounded-sm border border-hairline px-3 text-[12.5px] text-body no-underline hover:bg-hover hover:no-underline">
           GitHub
         </a>
-        <Button size="sm" variant="primary" asChild><Link href="/docs/quickstart" className="no-underline hover:no-underline">Get started</Link></Button>
+        <Button size="sm" variant="primary" asChild><a href={`${DOCS_URL}/quickstart`} className="no-underline hover:no-underline">Get started</a></Button>
       </div>
     </header>
   );
