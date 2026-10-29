@@ -1,5 +1,5 @@
 export const VERSION = "v0.4.1";
-export const REPO = "https://github.com/FrekiManagarm/lumyx";
+export const REPO = "https://github.com/lumyx-dev/sfu-core";
 // La documentation vit sur son propre sous-domaine (apps/docs). Tous les liens vers
 // elle passent par cette constante, pour qu'aucun clic ne traverse la redirection
 // declaree dans next.config.ts.
@@ -10,7 +10,7 @@ export const START = {
     title: "Run the SFU",
     lines: [
       "docker run -p 3000:3000 \\",
-      "  ghcr.io/frekimanagarm/lumyx:latest",
+      "  ghcr.io/lumyx-dev/sfu-core:latest",
       "",
       "# signaling  ws://127.0.0.1:3000/ws",
       "# dashboard  http://127.0.0.1:3000",

@@ -1,0 +1,4 @@
+# The apps' Tailwind @source directives point at the workspace-root node_modules
+# (../../../node_modules/...), so dependencies must be hoisted there.
+[install]
+linker = "hoisted"

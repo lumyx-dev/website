@@ -31,7 +31,7 @@ describe("coloration avec le theme lumyx", () => {
     for (const [code, lang] of [
       ['let peer = room.peer("ff104b2c")?;', "rust"],
       ['[collector]\nthresholds = true', "toml"],
-      ['docker run -p 3000:3000 ghcr.io/frekimanagarm/lumyx:latest', "bash"],
+      ['docker run -p 3000:3000 ghcr.io/lumyx-dev/sfu-core:latest', "bash"],
     ] as const) {
       const html = await render(code, lang);
       expect(html).toContain("var(--code-");

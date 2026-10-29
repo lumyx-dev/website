@@ -8,9 +8,9 @@
 
 /* Tailwind v4 n'emet que les classes qu'il voit : ni le design system local ni les composants
    compiles de Fumadocs ne sont dans l'arbre de cette app. */
-@source '../../../packages/ui/src';
-/* Chemin remonte a la racine du monorepo : bun hisse les dependances dans node_modules/ a la
-   racine, apps/docs/node_modules n'existe pas. Un @source vers un dossier absent est ignore
+@source '../../../node_modules/@lumyx/ui/src';
+/* Chemins remontes a la racine du workspace : bun hisse les dependances dans node_modules/ a la
+   racine (linker = "hoisted" dans bunfig.toml), apps/docs/node_modules n'existe pas. Un @source vers un dossier absent est ignore
    en silence par Tailwind — le build reste vert et les classes manquent. */
 @source '../../../node_modules/fumadocs-ui/dist';
 
