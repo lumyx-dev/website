@@ -64,3 +64,15 @@ Questions about the SFU itself belong in
 
 The code is [MIT](LICENSE) © Mathieu Chambaud. The Lumyx name, logo and the assets in
 [`brand/`](brand) are not covered by the MIT license and may not be used to imply endorsement.
+
+## Releasing
+
+Versions follow [SemVer](https://semver.org/) and are cut from an up-to-date `main`:
+
+```sh
+npm version patch   # or minor / major
+```
+
+This runs the CI checks, bumps `package.json`, commits `chore(release): vX.Y.Z`, tags `vX.Y.Z`
+and pushes. The tag triggers the Release workflow, which publishes a GitHub release with
+generated notes.
