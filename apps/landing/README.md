@@ -24,26 +24,26 @@ what it says has not been verified against the actual product:
   not pulled from an actual release history.
 - **The metrics reference** — la doc a demenage sur `docs.lumyx.dev` (`apps/docs`), et cette
   app la redirige. Les six metriques et seuils qu'elle documente n'existent pas dans
-  `apps/sfu/src` aujourd'hui ; le README la-bas les marque "Planned — next milestone."
+  le SFU (`lumyx-dev/sfu-core`) aujourd'hui ; le README la-bas les marque "Planned — next milestone."
 A comparison page against mediasoup, Janus and ion-sfu is tracked separately (LUM-631) and must
 be factual and sourced — the deleted one compared Lumyx to a "typical Go SFU stack" on claims
 nobody had verified.
 
-The remaining items are called out in the design spec's own risk section — see
-`docs/superpowers/specs/2026-08-30-lumyx-marketing-site-design.md` §12 — which makes
+The remaining items are called out in the design spec's own risk section (§12 of the
+marketing-site design spec, kept in the private `lumyx-dev/cloud` repo) — which makes
 "must not be deployed publicly" the headline risk of this branch. Confirm the numbers and claims
 above against the real implementation before this site goes live anywhere public.
 
 ## Running it
 
-From the monorepo root, or from this directory:
+From the repository root (`bun run dev` starts both apps through Turborepo), or from this
+directory:
 
 ```bash
 bun run dev
 ```
 
-The dev server runs on port **3002** (not 3000 — that's the dashboard; 3001 is the cloud app).
-Open [http://localhost:3002](http://localhost:3002) to see it.
+The dev server runs on Next.js's default port, [http://localhost:3000](http://localhost:3000).
 
 ## Notes
 

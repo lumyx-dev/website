@@ -3,12 +3,9 @@ import { defineConfig } from 'fumadocs-mdx/config';
 // esbuild en `packages: "external"`, puis l'importe nativement depuis Node — sans passer par le
 // bundler webpack/turbopack de Next qui tolere les imports relatifs sans extension. Le barrel
 // `@lumyx/ui` (`src/index.ts`) fait `export * from './lib/utils'` (sans extension), ce que le
-// resolveur ESM natif de Node refuse (`ERR_MODULE_NOT_FOUND`). `code-theme.ts` n'a aucun import
-// interne, donc ce sous-chemin se resout nativement sans toucher au reste du barrel. Ce sous-chemin
-// est execute par le Node natif de la machine, d'ou le `engines: { node: '>=22.18' }` declare a la
-// fois par packages/ui/package.json — le paquet qui EXPOSE le `.ts` brut — et par
-// apps/docs/package.json : c'est la version a partir de laquelle le type-stripping n'est plus
-// derriere un drapeau.
+// resolveur ESM natif de Node refuse (`ERR_MODULE_NOT_FOUND`). `code-theme` n'a aucun import
+// interne et est livre en JavaScript (avec un `.d.ts`) : Node refuse le type-stripping sous
+// node_modules, ou vit @lumyx/ui depuis la sortie du monorepo.
 import { lumyxCodeTheme } from '@lumyx/ui/code-theme';
 
 // Fumadocs fusionne nos options par-dessus ses defauts avec un spread superficiel

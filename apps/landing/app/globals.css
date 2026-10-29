@@ -1,5 +1,5 @@
 @import 'tailwindcss';
 @import '@lumyx/ui/styles.css';
-/* Le design system est un workspace local (packages/ui) : Tailwind doit scanner ses
-   sources pour emettre les classes utilisees par les composants. */
-@source '../packages/ui/src';
+/* @lumyx/ui est livre en sources TS : Tailwind doit les scanner pour emettre les classes
+   utilisees par les composants. Dependances hissees a la racine du workspace. */
+@source '../../../node_modules/@lumyx/ui/src';
