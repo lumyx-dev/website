@@ -2,9 +2,14 @@
   "name": "lumyx-website",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "apps/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "apps/*"
+    ],
+    "catalog": {
+      "@lumyx/ui": "https://codeload.github.com/lumyx-dev/ui/tar.gz/31eec184b7e83e6d0dbc30332e5609fdeaec533b"
+    }
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
