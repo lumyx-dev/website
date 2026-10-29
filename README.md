@@ -38,6 +38,10 @@ bun run dev --filter=@lumyx/docs
 Dependencies are hoisted to the root `node_modules` (`bunfig.toml`): the apps' Tailwind
 `@source` directives rely on it.
 
+`@lumyx/ui` is declared once, in the root `catalog`, as a GitHub tarball pinned to a commit —
+bun's lockfile is not stable when two workspaces share a `github:` dependency. Bump the commit
+SHA to update it; it becomes a plain npm version once `@lumyx/ui` is published.
+
 ### Environment variables
 
 All optional — production values are set on Vercel.
