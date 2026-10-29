@@ -17,7 +17,9 @@
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
     "test": "turbo run test",
-    "verify:ds": "turbo run verify:ds"
+    "verify:ds": "turbo run verify:ds",
+    "preversion": "test \"$(git branch --show-current)\" = main && git fetch -q origin main && test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/main)\" && bun run lint && bun run check-types && bun run test && bun run verify:ds && bun run build",
+    "postversion": "git push --follow-tags"
   },
   "devDependencies": {
     "turbo": "^2.10.12",
