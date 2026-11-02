@@ -1,0 +1,162 @@
+/* Ordre des couches recommande par @astrojs/starlight-tailwind : les couches de Starlight passent
+   sous le theme et les utilitaires de Tailwind, donc toute regle de ce fichier posee en
+   `utilities` bat les styles de Starlight sans course a la specificite. Pas de preflight : Starlight
+   porte son propre reset, starlight-tailwind en restaure les morceaux indispensables. */
+@layer base, starlight, theme, components, utilities;
+
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+@import '@lumyx/ui/styles.css';
+
+/* @lumyx/ui est livre en sources TS : Tailwind doit les scanner pour emettre les classes utilisees
+   par ses composants. Chemin remonte a la racine du workspace — bun hisse les dependances
+   (bunfig.toml), apps/docs/node_modules n'existe pas, et un @source vers un dossier absent est
+   ignore en silence. */
+@source '../../../../node_modules/@lumyx/ui/src';
+
+/* Le design system lit `--font-geist-*`, que next/font posait. Les paquets @fontsource-variable
+   declarent les familles sous ces noms. */
+:root {
+  --font-geist-sans: 'Geist Variable';
+  --font-geist-mono: 'Geist Mono Variable';
+}
+
+@layer utilities {
+  /* ── Le pont de tokens ──
+     Starlight peint tout a partir de ses variables `--sl-*`. On les pointe sur les alias
+     semantiques de Lumyx, qui basculent deja sous `.dark` (pose par ThemeProvider.astro en meme
+     temps que `data-theme`) : une seule declaration couvre les deux themes.
+     Le selecteur clair est repete pour egaler la specificite (0,2,0) du bloc clair de
+     starlight-tailwind, emis dans la meme couche ; l'ordre de source fait le reste. */
+  :root,
+  :root[data-theme='light'] {
+    --sl-font: var(--font-sans);
+    --sl-font-mono: var(--font-mono);
+
+    --sl-color-white: var(--text-strong);
+    --sl-color-gray-1: var(--text-strong);
+    --sl-color-gray-2: var(--text-body);
+    --sl-color-gray-3: var(--text-muted);
+    --sl-color-gray-4: var(--text-faint);
+    --sl-color-gray-5: var(--border-strong);
+    --sl-color-gray-6: var(--surface-hover);
+    --sl-color-gray-7: var(--surface-sunken);
+    --sl-color-black: var(--surface-page);
+
+    --sl-color-accent-low: var(--accent-tint);
+    --sl-color-accent: var(--accent);
+    --sl-color-accent-high: var(--accent-text);
+
+    --sl-color-text: var(--text-body);
+    --sl-color-text-accent: var(--accent-text);
+    --sl-color-text-invert: var(--text-on-accent);
+    --sl-color-bg: var(--surface-page);
+    --sl-color-bg-nav: var(--surface-page);
+    --sl-color-bg-sidebar: var(--surface-page);
+    --sl-color-bg-inline-code: var(--code-bg);
+    --sl-color-bg-accent: var(--accent);
+    --sl-color-hairline-light: var(--border-hairline);
+    --sl-color-hairline: var(--border-hairline);
+    --sl-color-hairline-shade: var(--border-strong);
+    --sl-color-backdrop-overlay: var(--surface-overlay);
+
+    /* Les asides (`<Aside type="caution">` des squelettes) prennent les couleurs semantiques. */
+    --sl-color-orange-low: var(--warn-tint);
+    --sl-color-orange: var(--warn-solid);
+    --sl-color-orange-high: var(--warn);
+    --sl-color-green-low: var(--ok-tint);
+    --sl-color-green: var(--ok-solid);
+    --sl-color-green-high: var(--ok);
+    --sl-color-blue-low: var(--info-tint);
+    --sl-color-blue: var(--info-solid);
+    --sl-color-blue-high: var(--info);
+    --sl-color-purple-low: var(--accent-tint);
+    --sl-color-purple: var(--accent);
+    --sl-color-purple-high: var(--accent-text);
+    --sl-color-red-low: var(--danger-tint);
+    --sl-color-red: var(--danger-solid);
+    --sl-color-red-high: var(--danger);
+
+    /* Echelle de type Lumyx : dense la ou Starlight suit une echelle de lecture a 16px.
+       La line-height du corps reste un litteral : le palier 14 tient 1.4, juste pour une
+       etiquette, trop serre pour de la prose qu'on lit en continu. 1.6 est la valeur de
+       l'ancienne doc. */
+    --sl-text-body: var(--text-14);
+    --sl-text-body-sm: var(--text-13);
+    --sl-line-height: 1.6;
+    --sl-text-h2: var(--text-26);
+    --sl-text-h3: var(--text-20);
+    --sl-text-h4: var(--text-16);
+    --sl-text-code: var(--text-code);
+    --sl-text-code-sm: var(--text-code);
+
+    /* Grille Lumyx : la prose tient 680px. */
+    --sl-content-width: 680px;
+  }
+
+  /* Titres de section de la sidebar : le seul manierisme typographique du systeme, par son
+     `@utility`, jamais recopie a la main. */
+  .sidebar-content .group-label .large {
+    @apply sl-label;
+  }
+
+  /* En-tete de page (src/components/starlight/PageTitle.astro). */
+  .lumyx-crumb {
+    margin: 0 0 0.5rem;
+    font-size: var(--text-12);
+    line-height: var(--text-12--line-height);
+    color: var(--text-faint);
+  }
+  .lumyx-title {
+    margin: 0;
+    font-size: var(--text-44);
+    line-height: var(--text-44--line-height);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-strong);
+    text-wrap: pretty;
+  }
+  .lumyx-lead {
+    margin: 1rem 0 0;
+    max-width: 680px;
+    font-size: var(--text-16);
+    letter-spacing: var(--text-16--letter-spacing);
+    line-height: 1.625;
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  /* `##` ouvre une section par une hairline : le rythme visuel de l'ancienne doc. */
+  .sl-markdown-content :is(h2, h3):not(:where(.not-content *)) {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-strong);
+  }
+  /* Starlight enveloppe chaque titre dans `.sl-heading-wrapper` avec son lien d'ancre, et le
+     <h2> y est `inline` : la hairline se pose sur l'enveloppe, sinon elle ne couvre que le texte. */
+  .sl-markdown-content .sl-heading-wrapper.level-h2:not(:first-child) {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  /* Page courante dans la sidebar : la teinte d'accent, pas un aplat plein. */
+  .sidebar-content a[aria-current='page'] {
+    background-color: var(--accent-tint);
+    color: var(--text-strong);
+  }
+
+  /* Bloc de code : la bordure du design system, le palier `text-code` en Geist Mono. Le fond vient
+     du style inline de Shiki, deja `var(--code-bg)` via `lumyxCodeTheme`. */
+  .sl-markdown-content pre.astro-code {
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+  }
+  .sl-markdown-content pre.astro-code,
+  .sl-markdown-content pre.astro-code code {
+    @apply font-mono text-code;
+  }
+}

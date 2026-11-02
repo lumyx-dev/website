@@ -1,0 +1,13 @@
+---
+// Route desactivee (prefixe `_`). Le composant entier est hydrate pour que le ThemeToggle de
+// SiteFrame reponde : a decouper en islands le jour ou la page revient en ligne.
+import Base from '@/layouts/base.astro';
+import BlogIndexPage from '@/components/pages/blog-index-page';
+---
+
+<Base
+  title="Blog — Lumyx"
+  description="Build notes on an open-source Rust WebRTC SFU, and analysis of the market around it."
+>
+  <BlogIndexPage client:load />
+</Base>

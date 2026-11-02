@@ -3,18 +3,17 @@ import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, extname } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-// `content` fait partie du perimetre : les seize `.mdx` portent du vrai balisage de design system
-// (cloud.mdx a une vingtaine d'attributs `className`, index.mdx ecrit un `<a>` a la main), et
-// Tailwind les scanne deja. La liste venait telle quelle de la variante dashboard, ou aucun
-// dossier de contenu n'existe — l'omission etait un heritage, pas une decision.
+// `src/content` fait partie du perimetre : les seize `.mdx` portent du vrai balisage de design
+// system (cloud.mdx a une vingtaine d'attributs `className`, index.mdx ecrit un `<a>` a la main),
+// et Tailwind les scanne deja.
 // Consequence acceptee : la regle 2 rejettera le mot « monospace » ecrit dans la prose d'une page.
 // C'est un mot d'une ligne a reformuler le jour ou ca arrive, contre une garde permanente sur
 // seize fichiers d'interface.
-const SCANNED = ['app', 'components', 'lib', 'content'].map((d) => join(ROOT, d));
+const SCANNED = ['src'].map((d) => join(ROOT, d));
 
 // Seul fichier autorisé à porter une valeur de couleur littérale — c'est là que vivrait une
 // valeur marketing-locale si jamais une apparaît. En pratique il n'y en a aucune.
-const COLOR_EXEMPT = join(ROOT, 'app', 'globals.css');
+const COLOR_EXEMPT = join(ROOT, 'src', 'styles', 'global.css');
 
 const failures = [];
 const fail = (rule, detail) => failures.push(`[${rule}] ${detail}`);
@@ -30,7 +29,7 @@ function walk(dir) {
 const files = SCANNED.flatMap(walk);
 const rel = (p) => p.slice(ROOT.length);
 
-// 1. Aucune couleur en dur hors globals.css
+// 1. Aucune couleur en dur hors global.css
 // #000/transparent inside a maskImage gradient is a luminance mask (opaque vs. hidden), not a
 // paint colour — exempt those lines rather than the whole file, so a real colour slipped in
 // alongside one still gets caught.
@@ -66,15 +65,15 @@ for (const f of files) {
   });
 }
 
-// 3. Pas de dangerouslySetInnerHTML
-const DANGEROUS_HTML_USAGE = /dangerouslySetInnerHTML\s*[=:]/;
+// 3. Pas de HTML brut : ni dangerouslySetInnerHTML (React) ni set:html (Astro).
+const DANGEROUS_HTML_USAGE = /dangerouslySetInnerHTML\s*[=:]|set:html\s*=/;
 for (const f of files) {
   if (DANGEROUS_HTML_USAGE.test(readFileSync(f, 'utf8'))) {
     fail('no-dangerous-html', rel(f));
   }
 }
 
-// 4. Zéro *.module.css — globals.css est le seul fichier CSS d'apps/docs.
+// 4. Zéro *.module.css — global.css est le seul fichier CSS d'apps/docs.
 for (const f of files) {
   if (extname(f) === '.css' && f !== COLOR_EXEMPT) {
     fail('no-css-modules', rel(f));

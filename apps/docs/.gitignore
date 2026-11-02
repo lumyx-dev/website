@@ -1,14 +1,13 @@
 # Dependencies
 node_modules/
 
-# Next.js
-.next/
-out/
+# Astro
+dist/
+.astro/
+.vercel/
 
 # TypeScript
 *.tsbuildinfo
-# Genere par `next typegen` / `next dev`, comme dans apps/dashboard.
-next-env.d.ts
 
 # Env
 .env
@@ -24,7 +23,3 @@ Thumbs.db
 
 # gstack
 .gstack/
-
-# Fumadocs MDX
-.source
-.map.ts

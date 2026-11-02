@@ -1,9 +1,10 @@
 # Dependencies
 node_modules/
 
-# Next.js
-.next/
-out/
+# Astro
+dist/
+.astro/
+.vercel/
 
 # TypeScript
 *.tsbuildinfo
