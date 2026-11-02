@@ -10,8 +10,8 @@ with native observability built in.
 
 | Path | What it is | Dev URL |
 |---|---|---|
-| [`apps/landing`](apps/landing) | Marketing site — lumyx.dev | http://localhost:3000 |
-| [`apps/docs`](apps/docs) | Documentation, built on [Fumadocs](https://fumadocs.dev) — docs.lumyx.dev | http://localhost:3003 |
+| [`apps/landing`](apps/landing) | Marketing site, built on [Astro](https://astro.build) — lumyx.dev | http://localhost:3000 |
+| [`apps/docs`](apps/docs) | Documentation, built on [Starlight](https://starlight.astro.build) — docs.lumyx.dev | http://localhost:3003 |
 | [`brand/`](brand) | Logos, avatars, social banners and Open Graph images | – |
 | [`docs/`](docs) | Design notes for this repository | – |
 
@@ -31,7 +31,7 @@ bun run dev --filter=@lumyx/docs
 |---|---|
 | `bun run build` | Production build of both apps |
 | `bun run lint` | ESLint |
-| `bun run check-types` | TypeScript (and Fumadocs route types) |
+| `bun run check-types` | `astro check` (TypeScript, `.astro` and content collections) |
 | `bun run test` | Bun tests |
 | `bun run verify:ds` | Design-system constraints |
 
@@ -48,10 +48,10 @@ All optional — production values are set on Vercel.
 
 | Variable | Used by | Default |
 |---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | landing, docs | `https://lumyx.dev` |
-| `NEXT_PUBLIC_DOCS_URL` | landing, docs | `https://docs.lumyx.dev` |
-| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | landing | `lumyx.dev` |
-| `CLOUD_APP_URL` | landing | – |
+| `PUBLIC_SITE_URL` | landing, docs | `https://lumyx.dev` |
+| `PUBLIC_DOCS_URL` | landing, docs | `https://docs.lumyx.dev` |
+
+Both are read at build time: the sites are static, so changing one means redeploying.
 
 ## Contributing
 

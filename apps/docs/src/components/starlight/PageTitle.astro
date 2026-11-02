@@ -1,0 +1,15 @@
+---
+// Remplace le PageTitle de Starlight : fil d'Ariane (nom de la section), titre au palier 44 et
+// chapo au palier 16, comme sous Fumadocs. L'id `_top` est celui que Starlight attend.
+const { entry, sidebar } = Astro.locals.starlightRoute;
+type SidebarEntry = (typeof sidebar)[number];
+
+function hasCurrent(e: SidebarEntry): boolean {
+  return e.type === 'link' ? e.isCurrent : e.entries.some(hasCurrent);
+}
+const section = sidebar.find((e) => e.type === 'group' && hasCurrent(e))?.label;
+---
+
+{section && <p class="lumyx-crumb sl-num">{section}</p>}
+<h1 id="_top" class="lumyx-title">{entry.data.title}</h1>
+{entry.data.description && <p class="lumyx-lead">{entry.data.description}</p>}

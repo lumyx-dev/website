@@ -1,9 +1,10 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# apps/docs — docs.lumyx.dev
 
-# This is NOT the Next.js you know
+Astro 7 + Starlight, fully static, deployed on Vercel through `@astrojs/vercel`.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+- Pages are MDX in `src/content/docs/`; each page imports the components it uses (Starlight's `Aside`, `@lumyx/ui`, `src/components/*`). There is no global MDX component map.
+- Sidebar order lives in `src/lib/sidebar.json` (`---Section---` entries open a group).
+- `stub: true` in frontmatter marks an outline page: kept in the sidebar, excluded from the sitemap (`src/lib/sitemap.ts`), `noindex` (`src/route-middleware.ts`). Not `draft`, which Starlight drops from production builds.
+- Starlight overrides in `src/components/starlight/` (theme toggle, wordmark, page title). Theme: dark by default, no system tracking, stored under `localStorage.theme` — same as the landing.
+- Styling: `src/styles/global.css` maps Starlight's `--sl-*` variables onto the `@lumyx/ui` tokens. Expressive Code is off; Astro's Shiki uses `lumyxCodeTheme` (`src/lib/markdown.ts`).
+- Public env vars use the `PUBLIC_` prefix (`PUBLIC_SITE_URL`, `PUBLIC_DOCS_URL`).

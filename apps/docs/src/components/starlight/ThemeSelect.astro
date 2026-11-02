@@ -1,0 +1,64 @@
+---
+// Remplace le menu clair/sombre/auto de Starlight par une bascule a deux etats, comme sur la
+// landing : la doc n'a jamais suivi le theme du systeme.
+import { Icon } from '@astrojs/starlight/components';
+---
+
+<lumyx-theme-toggle>
+  <button type="button" aria-label="Toggle theme">
+    <Icon name="sun" class="theme-icon sun" />
+    <Icon name="moon" class="theme-icon moon" />
+  </button>
+</lumyx-theme-toggle>
+
+<script>
+  class LumyxThemeToggle extends HTMLElement {
+    connectedCallback() {
+      const button = this.querySelector('button')!;
+      const sync = () => {
+        const dark = document.documentElement.dataset.theme !== 'light';
+        button.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} mode`);
+      };
+      sync();
+      button.addEventListener('click', () => {
+        const theme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+        const root = document.documentElement;
+        root.dataset.theme = theme;
+        root.classList.toggle('dark', theme === 'dark');
+        root.style.colorScheme = theme;
+        try {
+          localStorage.setItem('theme', theme);
+        } catch {}
+        sync();
+      });
+    }
+  }
+  customElements.define('lumyx-theme-toggle', LumyxThemeToggle);
+</script>
+
+<style>
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-sm, 12px);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  button:hover {
+    background: var(--surface-hover);
+    color: var(--text-strong);
+  }
+  .theme-icon {
+    font-size: 15px;
+  }
+  /* Le soleil propose de passer en clair : il se montre en sombre, la lune l'inverse. */
+  :global([data-theme='light']) .sun,
+  :global([data-theme='dark']) .moon {
+    display: none;
+  }
+</style>

@@ -1,0 +1,21 @@
+---
+// Remplace le ThemeProvider de Starlight. Meme comportement que la landing et que l'ancienne doc
+// (next-themes) : sombre par defaut, sans suivi du systeme, choix memorise sous la cle `theme`.
+// Pose a la fois `data-theme` (lu par Starlight) et la classe `.dark` (lue par les tokens de
+// @lumyx/ui), avant le premier rendu pour eviter un flash.
+---
+
+<script is:inline>
+  (() => {
+    let theme = 'dark';
+    try {
+      if (localStorage.getItem('theme') === 'light') theme = 'light';
+    } catch {}
+    const root = document.documentElement;
+    root.dataset.theme = theme;
+    root.classList.toggle('dark', theme === 'dark');
+    root.style.colorScheme = theme;
+    // Des composants de Starlight appellent encore cette API ; le bouton de theme ne s'en sert pas.
+    window.StarlightThemeProvider = { updatePickers() {} };
+  })();
+</script>

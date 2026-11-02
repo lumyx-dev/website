@@ -1,0 +1,13 @@
+---
+// Route desactivee (prefixe `_`). Le composant entier est hydrate pour que le ThemeToggle de
+// SiteFrame reponde : a decouper en islands le jour ou la page revient en ligne.
+import Base from '@/layouts/base.astro';
+import PricingPage from '@/components/pages/pricing-page';
+---
+
+<Base
+  title="Lumyx — the WebRTC SFU that tells you why the call was bad"
+  description="Open-source Rust SFU with observability in the media path: jitter, packet loss, RTT, NACK ratio, freeze ratio — per peer, per room, live."
+>
+  <PricingPage client:load />
+</Base>

@@ -3,11 +3,11 @@ import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, extname } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const SCANNED = ['app', 'components', 'lib'].map((d) => join(ROOT, d));
+const SCANNED = ['src'].map((d) => join(ROOT, d));
 
 // Seul fichier autorisé à porter une valeur de couleur littérale — c'est là que vivrait une
 // valeur marketing-locale si jamais une apparaît. En pratique il n'y en a aucune.
-const COLOR_EXEMPT = join(ROOT, 'app', 'globals.css');
+const COLOR_EXEMPT = join(ROOT, 'src', 'styles', 'global.css');
 
 const failures = [];
 const fail = (rule, detail) => failures.push(`[${rule}] ${detail}`);
@@ -23,7 +23,7 @@ function walk(dir) {
 const files = SCANNED.flatMap(walk);
 const rel = (p) => p.slice(ROOT.length);
 
-// 1. Aucune couleur en dur hors globals.css
+// 1. Aucune couleur en dur hors global.css
 // #000/transparent inside a maskImage gradient is a luminance mask (opaque vs. hidden), not a
 // paint colour — exempt those lines rather than the whole file, so a real colour slipped in
 // alongside one still gets caught.
@@ -52,15 +52,20 @@ for (const f of files) {
   }
 }
 
-// 3. Pas de dangerouslySetInnerHTML
+// 3. Pas de HTML brut : ni dangerouslySetInnerHTML (React) ni set:html (Astro). Seule exception,
+// set:html sur un <script type="application/ld+json"> — du JSON echappe, pas du balisage.
 const DANGEROUS_HTML_USAGE = /dangerouslySetInnerHTML\s*[=:]/;
+const SET_HTML = /set:html\s*=/g;
 for (const f of files) {
-  if (DANGEROUS_HTML_USAGE.test(readFileSync(f, 'utf8'))) {
-    fail('no-dangerous-html', rel(f));
+  const src = readFileSync(f, 'utf8');
+  if (DANGEROUS_HTML_USAGE.test(src)) fail('no-dangerous-html', rel(f));
+  for (const m of src.matchAll(SET_HTML)) {
+    const tag = src.slice(src.lastIndexOf('<', m.index), m.index);
+    if (!/^<script\b[^>]*type="application\/ld\+json"/.test(tag)) fail('no-dangerous-html', rel(f));
   }
 }
 
-// 4. Zéro *.module.css — globals.css est le seul fichier CSS d'apps/web.
+// 4. Zéro *.module.css — global.css est le seul fichier CSS de la landing.
 for (const f of files) {
   if (extname(f) === '.css' && f !== COLOR_EXEMPT) {
     fail('no-css-modules', rel(f));
@@ -72,4 +77,4 @@ if (failures.length) {
   failures.forEach((f) => console.error('  ' + f));
   process.exit(1);
 }
-console.log('✓ contraintes du design system respectees (apps/web)');
+console.log('✓ contraintes du design system respectees (apps/landing)');

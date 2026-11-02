@@ -1,0 +1,21 @@
+---
+// Route desactivee (prefixe `_`). Le composant entier est hydrate pour que le ThemeToggle de
+// SiteFrame reponde : a decouper en islands le jour ou la page revient en ligne.
+import type { GetStaticPaths } from 'astro';
+import Base from '@/layouts/base.astro';
+import BlogPostPage from '@/components/pages/blog-post-page';
+import { BLOG_CONTENT } from '@/components/blog/registry';
+import { BLOG_POSTS } from '@/lib/blog-data';
+
+export const getStaticPaths = (() =>
+  BLOG_POSTS.filter((p) => BLOG_CONTENT[p.slug]).map((p) => ({
+    params: { slug: p.slug },
+    props: { post: p },
+  }))) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+---
+
+<Base title={`${post.title} — Lumyx blog`} description={post.description}>
+  <BlogPostPage client:load slug={post.slug} />
+</Base>

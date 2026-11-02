@@ -7,13 +7,13 @@
       "apps/*"
     ],
     "catalog": {
-      "@lumyx/ui": "https://codeload.github.com/lumyx-dev/ui/tar.gz/31eec184b7e83e6d0dbc30332e5609fdeaec533b"
+      "@lumyx/ui": "https://codeload.github.com/lumyx-dev/ui/tar.gz/a4849d46ed58f63b315b753ed10d35ab5fec9469"
     }
   },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "start": "turbo run start",
+    "preview": "turbo run preview",
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
     "test": "turbo run test",

@@ -1,0 +1,17 @@
+---
+// Le wordmark Lumyx, qui renvoie vers lumyx.dev comme sous Fumadocs.
+import { Wordmark } from '@lumyx/ui';
+import { SITE_URL } from '@/lib/env';
+---
+
+<a href={SITE_URL} class="site-title" aria-label="Lumyx home">
+  <Wordmark />
+</a>
+
+<style>
+  .site-title {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+</style>

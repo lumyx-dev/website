@@ -1,7 +1,7 @@
 # @lumyx/web
 
 The Lumyx marketing site — the public pages (home, pricing, docs, changelog, blog, sign up).
-A Next.js App Router app that consumes the shared `@lumyx/ui` component and token library for
+An Astro app (React islands) that consumes the shared `@lumyx/ui` component and token library for
 all of its UI.
 
 ## Not production content
@@ -17,10 +17,10 @@ what it says has not been verified against the actual product:
   README — so the pages now describe that protocol instead. The positioning is the root README's:
   observability in the media path, against the low-level SFU toolkits (mediasoup, Janus, ion-sfu).
   Side effect: `/blog` has no posts left and renders an empty state.
-- **Pricing** (`lib/site-data.ts`, `app/pricing/`) — plans, quotas, billing units and prices come
+- **Pricing** (`src/lib/site-data.ts`, `src/pages/_pricing.astro`) — plans, quotas, billing units and prices come
   from a design proposal made without access to the Cloud repo.
-- **Benchmarks** (`lib/platform-data.ts`) — figures are illustrative, not measured.
-- **Releases** (`app/changelog/`) — changelog entries were authored for the design handoff,
+- **Benchmarks** (`src/lib/platform-data.ts`) — figures are illustrative, not measured.
+- **Releases** (`src/pages/_changelog.astro`) — changelog entries were authored for the design handoff,
   not pulled from an actual release history.
 - **The metrics reference** — la doc a demenage sur `docs.lumyx.dev` (`apps/docs`), et cette
   app la redirige. Les six metriques et seuils qu'elle documente n'existent pas dans
@@ -43,11 +43,11 @@ directory:
 bun run dev
 ```
 
-The dev server runs on Next.js's default port, [http://localhost:3000](http://localhost:3000).
+The dev server runs on [http://localhost:3000](http://localhost:3000).
 
 ## Notes
 
-- Content lives under `lib/` (e.g. `lib/site-data.ts`, `lib/docs-data.ts` qui ne porte plus
+- Content lives under `src/lib/` (e.g. `src/lib/site-data.ts`, `src/lib/docs-data.ts` qui ne porte plus
   que `RELEASES`) rather than hardcoded in components.
 - `scripts/verify-ds.mjs` checks this app's CSS/markup against the design system's tokens —
   run it with `bun run verify:ds`.
