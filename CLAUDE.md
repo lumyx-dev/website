@@ -6,6 +6,7 @@ Bun + Turborepo workspace with two Astro 7 apps: `apps/landing` (lumyx.dev) and 
 - Each app has its own `AGENTS.md`.
 - Dependencies are hoisted (`bunfig.toml`); Tailwind `@source` paths in each `src/styles/global.css` point at the root `node_modules/@lumyx/ui/src`.
 - Brand assets live in `brand/`.
+- Commits and PRs never mention Claude: no `Co-Authored-By: Claude` trailer, no "Generated with Claude Code" line, no reference to AI in messages or descriptions.
 
 <!-- rtk-instructions v2 -->
 # RTK (Rust Token Killer) - Token-Optimized Commands
