@@ -32,8 +32,8 @@ describe("sitemap", () => {
   );
   const kept = pages.filter(filter);
 
-  test("garde les cinq pages redigees, sans les onze squelettes", () => {
-    expect(kept).toHaveLength(5);
+  test("garde les quatre pages redigees, sans les onze squelettes", () => {
+    expect(kept).toHaveLength(4);
     for (const slug of STUBS) expect(kept).not.toContain(`${DOCS_URL}/${slug}`);
   });
 

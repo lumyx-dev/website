@@ -184,7 +184,6 @@ export const FOOTER_COLS: Array<{
       { label: "Observability", href: "/#platform" },
       // Route desactivee (app/_pricing).
       // { label: "Pricing", href: "/pricing" },
-      { label: "Lumyx Cloud", href: `${DOCS_URL}/cloud` },
     ],
   },
   {

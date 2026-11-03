@@ -4,7 +4,7 @@ description: Lumyx is a WebRTC SFU with observability built into the media path 
 ---
 
 import { DocCard, DocCards } from '@/components/doc-cards';
-import { REPO, VERSION } from '@/lib/site-data';
+import { REPO } from '@/lib/site-data';
 
 ## What Lumyx is
 
@@ -32,12 +32,10 @@ peer ──ICE/DTLS/SRTP──▶ lumyx (signaling · forwarding · collector ·
                                 └─▶ /metrics (Prometheus) · dashboard :3000
 ```
 
-## Open source vs. Cloud
+## Open source
 
 Nothing is held back from the MIT repo: the SFU, all six metrics, default thresholds and the dashboard are
-all there. Lumyx Cloud ({VERSION}) sells operation on top of the same binary — regions, quotas, retention
-and per-environment keys — not extra features. Moving from Cloud back to self-hosted is a URL change; the
-signaling protocol and token grants don't differ.
+all there.
 
 {/* Palier explicite : un JSX litteral en minuscules ne passe pas par la table de composants du
     MDX, donc ce lien ne recupere rien de l'override `a` et se lirait comme du corps de texte. */}
@@ -56,9 +54,6 @@ signaling protocol and token grants don't differ.
   </DocCard>
   <DocCard href="/self-hosting" title="Self-hosting">
     Deploy the binary in production — Docker, from source, or behind your own proxy.
-  </DocCard>
-  <DocCard href="/cloud" title="Lumyx Cloud">
-    Same SFU, hosted. Regions, retention and alerting wired in.
   </DocCard>
   <DocCard href="/metrics-reference" title="Metrics reference">
     The six metrics the collector reads off RTCP, and what each threshold breach means.

@@ -3,12 +3,12 @@ import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, extname } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-// `src/content` fait partie du perimetre : les seize `.mdx` portent du vrai balisage de design
-// system (cloud.mdx a une vingtaine d'attributs `className`, index.mdx ecrit un `<a>` a la main),
+// `src/content` fait partie du perimetre : les quinze `.mdx` portent du vrai balisage de design
+// system (index.mdx ecrit un `<a>` a la main),
 // et Tailwind les scanne deja.
 // Consequence acceptee : la regle 2 rejettera le mot « monospace » ecrit dans la prose d'une page.
 // C'est un mot d'une ligne a reformuler le jour ou ca arrive, contre une garde permanente sur
-// seize fichiers d'interface.
+// quinze fichiers d'interface.
 const SCANNED = ['src'].map((d) => join(ROOT, d));
 
 // Seul fichier autorisé à porter une valeur de couleur littérale — c'est là que vivrait une

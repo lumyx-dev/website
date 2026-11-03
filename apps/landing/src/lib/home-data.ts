@@ -185,7 +185,7 @@ export const STEPS: { n: string; title: string; body: string; tab: SnippetKey; h
 
 export type StartLine = { p: string; v: string; dim?: boolean; href?: string };
 
-export const START: Record<"docker" | "cargo" | "cloud", { label: string; lines: StartLine[] }> = {
+export const START: Record<"docker" | "cargo", { label: string; lines: StartLine[] }> = {
   docker: {
     label: "docker run",
     lines: [
@@ -200,13 +200,6 @@ export const START: Record<"docker" | "cargo" | "cloud", { label: string; lines:
       { p: "$", v: "mkcert -install && mkcert localhost 127.0.0.1" },
       { p: "$", v: "cargo run --release" },
       { p: "#", v: "then open https://localhost:3000", dim: true },
-    ],
-  },
-  cloud: {
-    label: "Lumyx Cloud",
-    lines: [
-      { p: "#", v: "Managed hosting, same binary. Not needed to try Lumyx.", dim: true },
-      { p: "→", v: `${DOCS_URL.replace(/^https?:\/\//, "")}/cloud`, href: `${DOCS_URL}/cloud` },
     ],
   },
 };
@@ -225,7 +218,7 @@ export const FEATURE_GROUPS: { name: string; items: [string, boolean][] }[] = [
   { name: "Media", items: [["Selective forwarding", true], ["ICE", true], ["DTLS", true], ["SRTP", true], ["RTP forwarding", true], ["Simulcast layers", false], ["TURN fallback", false]] },
   { name: "Observability", items: [["RTCP metrics collector", false], ["Six metrics per peer", false], ["Per-room rollups", false], ["Room topology", false], ["Prometheus /metrics", false], ["Session replay", false]] },
   { name: "Alerting", items: [["Thresholds per environment", false], ["Debounce", false], ["Slack", false], ["PagerDuty", false], ["Webhooks", false], ["Audio-only fallback", false]] },
-  { name: "Operations", items: [["Single process", true], ["Docker image", true], ["WebSocket signaling", true], ["Room manager", true], ["Lumyx Cloud", false]] },
+  { name: "Operations", items: [["Single process", true], ["Docker image", true], ["WebSocket signaling", true], ["Room manager", true]] },
 ];
 
 export const WORKS = [
@@ -254,7 +247,6 @@ export const FOOTER_COLS = [
       { label: "Observability", href: "/#product" },
       { label: "Room topology", href: "/#topology" },
       { label: "Project status", href: "/#status" },
-      { label: "Lumyx Cloud", href: `${DOCS_URL}/cloud` },
     ],
   },
   {
