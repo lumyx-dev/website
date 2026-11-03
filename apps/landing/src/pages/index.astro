@@ -1,290 +1,350 @@
 ---
 import Base from '@/layouts/base.astro';
-import { Card, LumyxMark, buttonVariants, cn } from '@lumyx/ui';
+import { LumyxMark, buttonVariants, cn } from '@lumyx/ui';
 import { ThemeToggle } from '@/components/site/theme-toggle';
-import { CodePanel } from '@/components/site/code-panel';
-import { PlatformBento } from '@/components/site/platform-bento';
-// TIERS revient avec la section Pricing, plus bas, quand on la reaffiche.
-import { CONFIG_STEPS, FEATURE_GROUPS, NO_LIST } from '@/lib/platform-data';
-import { DOCS_URL, REPO } from '@/lib/site-data';
+import { CopyCommand } from '@/components/site/copy';
+import { HeroConsole } from '@/components/site/hero-console';
+import { RoomTopology } from '@/components/site/room-topology';
+import { ConfigPanel } from '@/components/site/config-panel';
+import { StartTerminal } from '@/components/site/start-terminal';
+import { DOCS_URL, REPO, VERSION } from '@/lib/site-data';
+import {
+  DOCKER_RUN,
+  FEATURE_GROUPS,
+  FOOTER_COLS,
+  METRIC_NAMES,
+  NAV,
+  NOS,
+  PAINS,
+  PLANNED,
+  TOPO_LEGEND,
+  WORKS,
+} from '@/lib/home-data';
 import { organizationJsonLd, softwareApplicationJsonLd } from '@/lib/schema';
 
-const NAV = [
-  { href: '/', label: 'Product' },
-  { href: '/#platform', label: 'Observability' },
-  // La doc est hors origine : l'entree part vers docs.lumyx.dev, pas vers /docs.
-  { href: DOCS_URL, label: 'Docs' },
-  // Routes desactivees (src/pages/_blog, _pricing, _changelog).
-  // { href: '/blog', label: 'Blog' },
-  // { href: '/pricing', label: 'Pricing' },
-  // { href: '/changelog', label: 'Changelog' },
-];
-
 /**
- * The landing page — "Platform".
- * Dense, product-first, many entry points.
+ * The home page — design "Lumyx Home" (Claude Design).
+ * Static layout in Astro; the live console, topology, config panel and terminal are islands.
+ * The two simulated islands share one store (src/lib/peer-sim.ts), so they tick together.
  */
+
+const WRAP = 'mx-auto box-border w-full max-w-[1440px] px-[clamp(20px,5vw,64px)]';
+const SECTION_GAP = 'pt-[clamp(88px,10vw,144px)]';
+const H2 = 'm-0 text-[clamp(30px,3.2vw,42px)] font-semibold leading-[1.08] tracking-[-0.035em] text-strong text-balance';
+const EYEBROW = 'sl-num text-13 text-accent-text';
+const BTN = 'no-underline hover:no-underline active:scale-[0.98]';
+const QUICKSTART = `${DOCS_URL}/quickstart`;
 ---
 
 <Base
   title="Lumyx — the WebRTC SFU that tells you why the call was bad"
   description="Open-source Rust SFU with observability in the media path: jitter, packet loss, RTT, NACK ratio, freeze ratio — per peer, per room, live."
 >
-  <div class="min-h-dvh bg-page text-body">
-    <script
-      is:inline
-      type="application/ld+json"
-      set:html={JSON.stringify([organizationJsonLd(), softwareApplicationJsonLd()]).replace(/</g, "\\u003c")}
-    />
-    <header class="border-b border-subtle px-8">
-      <div class="mx-auto flex h-15 w-full max-w-7xl items-center gap-6.5">
-        <a href="/" class="flex items-center gap-2.5 no-underline hover:no-underline">
+  <script
+    is:inline
+    type="application/ld+json"
+    set:html={JSON.stringify([organizationJsonLd(), softwareApplicationJsonLd()]).replace(/</g, '\\u003c')}
+  />
+
+  <div class="min-h-dvh overflow-x-clip bg-page text-body">
+    {/* 1 · Nav */}
+    <header class="sticky top-0 z-20 border-b border-hairline bg-page">
+      <div class={cn(WRAP, 'flex h-16 items-center gap-8')}>
+        <a href="/" class="flex items-center gap-2.5 text-strong no-underline hover:text-strong hover:no-underline">
           <LumyxMark size={18} className="text-accent" />
-          <span class="text-[15px] font-semibold tracking-[-0.02em] text-strong">Lumyx</span>
+          <span class="text-16 font-semibold tracking-[-0.02em]">Lumyx</span>
         </a>
-        <nav class="hidden items-center gap-5 md:flex">
+        <nav class="hidden gap-7 text-14 min-[900px]:flex">
           {NAV.map((n) => (
-            <a href={n.href} class="text-[12.5px] text-muted no-underline hover:text-strong hover:no-underline">
-              {n.label}
-            </a>
+            <a href={n.href} class="text-muted no-underline hover:text-strong hover:no-underline">{n.label}</a>
           ))}
         </nav>
-        <span class="flex-1" />
+        <span class="flex-1"></span>
         <ThemeToggle client:load />
-        <a
-          href={`${DOCS_URL}/quickstart`}
-          data-slot="button"
-          class={cn(buttonVariants({ variant: 'primary', size: 'sm', className: 'no-underline hover:no-underline' }))}
-        >
+        <a href={QUICKSTART} data-slot="button" class={cn(buttonVariants({ variant: 'primary', size: 'sm' }), BTN)}>
           Get started
         </a>
       </div>
     </header>
 
-    {/* Hero — one idea, centred, with the announcement pill above it. */}
-    <section class="flex flex-col items-center gap-5.5 border-b border-subtle px-8 pb-14 pt-18 text-center">
-      <a
-        href={`${REPO}#project-status`}
-        class="inline-flex h-7 items-center gap-2 rounded-pill border border-hairline bg-card p-0.75 pr-2 text-[12.5px] text-muted no-underline hover:no-underline"
-      >
-        <span class="inline-flex h-4.5 items-center rounded-pill bg-accent px-2 text-11 font-semibold tracking-[0.04em] text-on-accent">
-          Alpha
-        </span>
-        ICE, DTLS, SRTP and RTP forwarding work end to end — the rest is planned
-        <span class="text-faint">→</span>
-      </a>
-
-      <h1 class="max-w-220 text-[66px] font-semibold leading-[1.02] tracking-[-0.04em] text-strong text-balance">
-        Ship real-time video you can actually debug
-      </h1>
-      <p class="max-w-155 text-[17px] leading-relaxed text-muted text-pretty">
-        Lumyx is an open-source WebRTC SFU written in Rust. Selective forwarding, with jitter, packet loss,
-        RTT, NACK and freeze measured inside the media path — per peer, per room, every 500ms.
-      </p>
-
-      <div class="flex flex-wrap items-center justify-center gap-3 pt-1">
+    {/* 2 · Hero — copy left, the live console right */}
+    <section
+      class={cn(
+        WRAP,
+        'grid grid-cols-1 items-start gap-[clamp(40px,5vw,72px)] pb-[clamp(48px,6vw,80px)] pt-[clamp(48px,7vw,96px)] min-[900px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]',
+      )}
+    >
+      <div class="flex min-w-0 flex-col gap-7 pt-2">
         <a
-          href={`${DOCS_URL}/quickstart`}
-          data-slot="button"
-          class={cn(buttonVariants({ variant: 'primary', size: 'lg', className: 'no-underline hover:no-underline' }))}
+          href={`${REPO}#project-status`}
+          class="inline-flex flex-col items-start gap-2.5 self-start text-13 leading-[1.4] text-body no-underline hover:text-strong hover:no-underline min-[1180px]:min-h-7 min-[1180px]:flex-row min-[1180px]:items-center min-[1180px]:rounded-[14px] min-[1180px]:border min-[1180px]:border-stroke min-[1180px]:py-0.5 min-[1180px]:pl-1 min-[1180px]:pr-3"
         >
-          Start building now
+          <span class="rounded-pill bg-accent-tint px-2 py-0.5 text-12 font-medium text-accent-text">Alpha {VERSION}</span>
+          ICE, DTLS, SRTP and RTP forwarding work end to end
         </a>
-        <a
-          href={REPO}
-          class="inline-flex h-10.5 items-center rounded-sm border border-stroke px-3.5 text-[13.5px] text-strong no-underline hover:no-underline"
-        >
-          Open source
-        </a>
+        <h1 class="m-0 text-[clamp(40px,5vw,62px)] font-semibold leading-[1.02] tracking-[-0.035em] text-strong text-balance">
+          Ship real-time video you can actually debug
+        </h1>
+        <p class="m-0 max-w-[520px] text-[clamp(16px,1.4vw,18px)] leading-[1.55] text-muted text-pretty">
+          An open-source WebRTC SFU in Rust. It reads RTCP as packets pass through, so when a call goes bad you see{' '}
+          <span class="text-strong">which peer</span> and <span class="text-strong">why</span>.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href={QUICKSTART} data-slot="button" class={cn(buttonVariants({ variant: 'primary', size: 'lg' }), BTN)}>
+            Read the Quickstart
+          </a>
+          <a href={REPO} data-slot="button" class={cn(buttonVariants({ variant: 'secondary', size: 'lg' }), BTN)}>
+            View on GitHub
+          </a>
+        </div>
+        <CopyCommand client:idle command={DOCKER_RUN} />
+      </div>
+
+      <div class="min-w-0">
+        <HeroConsole client:load />
       </div>
     </section>
 
-    {/* Configuration — the tabbed code panel drives the whole story. */}
-    <section id="platform" class="border-b border-subtle px-8 py-14">
-      <div class="mx-auto grid w-full max-w-7xl grid-cols-1 items-start gap-8 lg:grid-cols-[1.25fr_1fr]">
-        <CodePanel client:visible />
+    {/* 3 · Metrics marquee */}
+    <div class="flex h-11 items-center overflow-hidden border-y border-hairline" aria-hidden="true">
+      <div class="sl-num flex gap-12 whitespace-nowrap pl-12 text-13 text-faint animate-[sl-marquee_48s_linear_infinite] motion-reduce:animate-none">
+        {[...METRIC_NAMES, ...METRIC_NAMES].map((m) => <span>{m}</span>)}
+      </div>
+    </div>
 
-        <div class="flex flex-col gap-4 pt-3">
-          <h2 class="text-[28px] font-semibold leading-[1.12] tracking-[-0.028em] text-strong text-pretty">
-            Configure it once, then stop thinking about it
-          </h2>
-          <p class="text-16 leading-relaxed text-muted text-pretty">
-            Thresholds, remediation and destinations live in one file. The same six metrics reach your dashboard,
-            your Prometheus, your webhook and your client SDK — no exporter to write, no collector to run.
-          </p>
-
-          <div class="flex flex-col pt-0.5">
-            {CONFIG_STEPS.map((s, i) => (
-              <div
-                              class={`flex gap-3 border-t border-subtle py-3 ${i === CONFIG_STEPS.length - 1 ? "border-b" : ""}`}
-              >
-                <span class="sl-num w-4.5 flex-none text-12 text-faint">{s.index}</span>
-                <span class="text-[13.5px] leading-relaxed text-muted">
-                  <strong class="font-semibold text-strong">{s.title}</strong> — {s.body}
-                </span>
+    {/* 4 · Three pains, zig-zag */}
+    <section id="product" class={cn(WRAP, 'flex scroll-mt-20 flex-col gap-[clamp(64px,8vw,112px)] pt-[clamp(72px,9vw,128px)]')}>
+      {PAINS.map((p, i) => (
+        <div data-reveal="0" class="grid grid-cols-1 items-center gap-[clamp(32px,5vw,80px)] min-[900px]:grid-cols-2">
+          <div class={cn('flex min-w-0 max-w-[540px] flex-col gap-[18px]', i % 2 === 1 && 'min-[900px]:order-2 min-[900px]:justify-self-end')}>
+            <span class={EYEBROW}>{p.n}</span>
+            <h2 class="m-0 text-[clamp(28px,3vw,38px)] font-semibold leading-[1.1] tracking-[-0.03em] text-strong text-balance">{p.title}</h2>
+            <p class="m-0 text-16 leading-[1.6] text-muted text-pretty">{p.body}</p>
+          </div>
+          <div class="min-w-0 overflow-hidden rounded-xs border border-stroke bg-card">
+            <div class="flex h-10 items-center justify-between border-b border-hairline px-4 text-12">
+              <span class="sl-label">Proof</span>
+              <span class="sl-num text-faint">{p.src}</span>
+            </div>
+            {p.kv.map((kv) => (
+              <div class="sl-num flex items-baseline justify-between gap-4 border-b border-subtle px-4 py-[11px] text-13 last:border-b-0">
+                <span class="min-w-0 text-muted [overflow-wrap:anywhere]">{kv.k}</span>
+                <span class={cn('text-right', kv.faint ? 'text-faint' : 'text-strong')}>{kv.v}</span>
               </div>
             ))}
           </div>
+        </div>
+      ))}
+    </section>
 
-          <a href={DOCS_URL} class="text-[13.5px] font-medium">Read the configuration reference</a>
+    {/* 5 · Room topology — the signature section */}
+    <section id="topology" class={cn(WRAP, 'flex scroll-mt-20 flex-col gap-8 pt-[clamp(88px,10vw,144px)]')}>
+      <div data-reveal="0" class="flex flex-wrap items-end justify-between gap-x-12 gap-y-5">
+        <div class="flex max-w-[640px] flex-col gap-3.5">
+          <span class={EYEBROW}>Room topology</span>
+          <h2 class="m-0 text-[clamp(32px,3.6vw,46px)] font-semibold leading-[1.05] tracking-[-0.035em] text-strong text-balance">
+            See the path every packet takes
+          </h2>
+          <p class="m-0 text-16 leading-[1.6] text-muted text-pretty">
+            One room, drawn from what the forwarder sees. Edge width is bitrate. Pulse speed is round-trip time. The
+            dashed edge is the peer your users are complaining about.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-x-5 gap-y-2.5 text-12 text-muted">
+          {TOPO_LEGEND.map((l) => (
+            <span class="flex items-center gap-2">
+              {l.kind === 'line' && <span class="h-[3px] w-[22px] bg-faint"></span>}
+              {l.kind === 'dashed' && <span class="h-0 w-[22px] border-t-2 border-dashed border-danger-solid"></span>}
+              {l.kind === 'warn' && <span class="size-2.5 rounded-pill border-2 border-warn-solid"></span>}
+              {l.kind === 'bad' && <span class="size-2.5 rounded-pill border-2 border-danger-solid"></span>}
+              {l.label}
+            </span>
+          ))}
         </div>
       </div>
-    </section>
-
-    {/* The platform, in three shown promises. */}
-    <section id="why" class="px-8 pb-2 pt-16">
-      <div class="mx-auto flex w-full max-w-7xl flex-col gap-2">
-        <span class="sl-label text-accent-text">The platform</span>
-        <h2 class="max-w-155 text-[40px] font-semibold leading-[1.06] tracking-[-0.035em] text-strong text-balance">
-          Three things, each one you&rsquo;d otherwise build yourself
-        </h2>
+      <div data-reveal="80">
+        <RoomTopology client:visible />
       </div>
     </section>
 
-    <div class="px-8 py-8">
-      <div class="mx-auto w-full max-w-7xl">
-        <PlatformBento client:visible />
-      </div>
-    </div>
+    {/* 6 · Configure */}
+    <section class={cn(WRAP, SECTION_GAP)}>
+      <ConfigPanel client:visible>
+        <div class="flex flex-col gap-3.5">
+          <h2 class={H2}>Configure it once, then stop thinking about it</h2>
+          <p class="m-0 text-16 leading-[1.6] text-muted text-pretty">
+            One TOML file. Clients speak plain JSON over a WebSocket, with no SDK to install.
+          </p>
+        </div>
+      </ConfigPanel>
+    </section>
 
-    {/* One hairline band instead of three floating columns. */}
-    <div class="px-8 pb-14">
-      <div class="mx-auto grid w-full max-w-7xl grid-cols-1 gap-px overflow-hidden rounded-lg border border-hairline bg-subtle md:grid-cols-3">
-        {NO_LIST.map((n) => (
-          <div class="flex flex-col gap-2 bg-card p-6">
-            <span class="text-[19px] font-semibold tracking-[-0.02em] text-strong">{n.title}</span>
-            <span class="text-[13.5px] leading-relaxed text-muted text-pretty">{n.body}</span>
+    {/* 7 · The "no" band */}
+    <section class={cn(WRAP, SECTION_GAP)}>
+      <div data-reveal="0" class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-px border-y border-hairline bg-hairline">
+        {NOS.map((no) => (
+          <div class="flex flex-col gap-1.5 bg-page py-6 pr-6">
+            <span class="text-[18px] font-semibold tracking-[-0.02em] text-strong">{no.t}</span>
+            <span class="text-14 leading-normal text-muted">{no.d}</span>
           </div>
         ))}
       </div>
-    </div>
+    </section>
 
-    {/* Feature index — sticky rail, grouped pills. */}
-    <section class="border-y border-subtle px-8 py-14">
-      <div class="mx-auto grid w-full max-w-7xl grid-cols-1 items-start gap-10 lg:grid-cols-[260px_1fr]">
-        <div class="flex flex-col gap-3 lg:sticky lg:top-6">
-          <h2 class="text-[30px] font-semibold leading-[1.1] tracking-[-0.03em] text-strong">
-            Everything else that ships with it
-          </h2>
-          <a href={DOCS_URL} class="text-[13.5px] font-medium">View all features</a>
+    {/* 8 · Feature index */}
+    <section class={cn(WRAP, SECTION_GAP, 'grid grid-cols-1 items-start gap-x-[clamp(32px,5vw,72px)] gap-y-10 min-[900px]:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]')}>
+      <div class="flex flex-col gap-3.5 min-[900px]:sticky min-[900px]:top-24">
+        <h2 class={H2}>Everything in the box</h2>
+        <p class="m-0 max-w-[340px] text-[15px] leading-[1.6] text-muted text-pretty">
+          Solid pills ship in {VERSION}. Dashed pills are on the roadmap.
+        </p>
+        <div class="flex gap-4 text-12 text-muted">
+          <span class="flex items-center gap-1.5"><span class="size-1.5 rounded-pill bg-ok-solid"></span>Works today</span>
+          <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-[3px] border border-dashed border-faint"></span>Planned</span>
         </div>
+      </div>
+      <div class="flex flex-col border-t border-hairline">
+        {FEATURE_GROUPS.map((g) => (
+          <div data-reveal="0" class="grid grid-cols-1 gap-x-6 gap-y-3 border-b border-hairline py-6 min-[640px]:grid-cols-[160px_minmax(0,1fr)]">
+            <span class="pt-[5px] text-[15px] font-semibold text-strong">{g.name}</span>
+            <ul class="m-0 flex list-none flex-wrap gap-2 p-0">
+              {g.items.map(([label, ok]) => (
+                <li
+                  class={cn(
+                    'inline-flex h-[30px] items-center gap-[7px] rounded-[6px] border border-stroke px-3 text-13',
+                    ok ? 'border-solid bg-card text-strong' : 'border-dashed bg-transparent text-muted',
+                  )}
+                >
+                  {ok && <span class="size-1.5 rounded-pill bg-ok-solid"></span>}
+                  {label}
+                  <span class="sr-only">{ok ? '(works today)' : '(planned)'}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
 
-        <div class="flex flex-col">
-          {FEATURE_GROUPS.map((g, i) => (
-            <div
-                          class={`flex flex-col gap-3 border-t border-subtle py-5 ${i === FEATURE_GROUPS.length - 1 ? "border-b" : ""}`}
-            >
-              <span class="sl-label text-faint">{g.group}</span>
-              <div class="flex flex-wrap gap-2">
-                {g.items.map((item) => (
-                  <a
-                                      href={DOCS_URL}
-                    class="inline-flex min-h-7.5 flex-none items-center whitespace-nowrap rounded-pill border border-hairline bg-card px-3 py-1.5 text-13 text-body no-underline hover:border-stroke hover:text-strong hover:no-underline"
-                  >
-                    {item}
-                  </a>
-                ))}
+    {/* 9 · Honest status */}
+    <section id="status" class={cn(WRAP, SECTION_GAP, 'flex scroll-mt-20 flex-col gap-8')}>
+      <div data-reveal="0" class="flex flex-wrap items-end justify-between gap-x-12 gap-y-4">
+        <div class="flex max-w-[620px] flex-col gap-3.5">
+          <span class={EYEBROW}>Project status · alpha {VERSION}</span>
+          <h2 class={H2}>What works, and what doesn't yet</h2>
+          <p class="m-0 text-16 leading-[1.6] text-muted text-pretty">
+            No customers yet, no published benchmark. Here is the line between the two, kept in sync with the README.
+          </p>
+        </div>
+        <a href={`${REPO}#project-status`} class="text-14 font-medium">README · Project status</a>
+      </div>
+      <div data-reveal="80" class="grid grid-cols-1 overflow-hidden rounded-xs min-[1000px]:grid-cols-2 border border-stroke bg-card">
+        {[
+          { title: 'Works today', rows: WORKS, ok: true },
+          { title: 'Planned', rows: PLANNED, ok: false },
+        ].map((col) => (
+          <div class={cn('flex flex-col', !col.ok && 'border-t border-hairline min-[1000px]:border-l min-[1000px]:border-t-0')}>
+            <div class="flex h-11 items-center gap-2 border-b border-hairline px-5">
+              {col.ok ? (
+                <span class="size-[7px] rounded-pill bg-ok-solid"></span>
+              ) : (
+                <span class="size-[9px] rounded-pill border border-dashed border-faint"></span>
+              )}
+              <span class="text-14 font-semibold text-strong">{col.title}</span>
+            </div>
+            {col.rows.map((w) => (
+              <div class="flex justify-between gap-4 border-b border-subtle px-5 py-3 text-14">
+                <span class={col.ok ? 'text-strong' : 'text-body'}>{w.t}</span>
+                <span class="sl-num text-right text-12 text-faint">{w.d}</span>
               </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* 10 · Final CTA */}
+    <section class={cn(WRAP, 'flex flex-col gap-8 py-[clamp(88px,10vw,144px)]')}>
+      <div data-reveal="0" class="flex flex-wrap items-end justify-between gap-x-12 gap-y-5">
+        <h2 class="m-0 max-w-[720px] text-[clamp(34px,4.4vw,56px)] font-semibold leading-[1.02] tracking-[-0.035em] text-strong text-balance">
+          Find out why your last call was bad
+        </h2>
+        <div class="flex flex-wrap gap-3">
+          <a href={QUICKSTART} data-slot="button" class={cn(buttonVariants({ variant: 'primary', size: 'lg' }), BTN)}>
+            Read the Quickstart
+          </a>
+          <a href={REPO} data-slot="button" class={cn(buttonVariants({ variant: 'secondary', size: 'lg' }), BTN)}>
+            View on GitHub
+          </a>
+        </div>
+      </div>
+      <div data-reveal="80">
+        <StartTerminal client:visible />
+      </div>
+    </section>
+
+    {/* 11 · Footer */}
+    <footer class="border-t border-hairline">
+      <div class={cn(WRAP, 'flex flex-col gap-12 pb-10 pt-14')}>
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-8">
+          <div class="flex flex-col gap-3">
+            <span class="flex items-center gap-2.5 text-strong">
+              <LumyxMark size={16} className="text-accent" />
+              <span class="text-16 font-semibold tracking-[-0.02em]">Lumyx</span>
+            </span>
+            <span class="max-w-[240px] text-13 leading-normal text-muted">The WebRTC SFU that tells you why the call was bad.</span>
+          </div>
+          {FOOTER_COLS.map((fc) => (
+            <div class="flex flex-col gap-2.5">
+              <span class="sl-label">{fc.t}</span>
+              {fc.links.map((l) => (
+                <a href={l.href} class="text-14 text-muted no-underline hover:text-strong hover:no-underline">{l.label}</a>
+              ))}
             </div>
           ))}
         </div>
-      </div>
-    </section>
-
-    {/* Section Pricing masquee — la page /pricing reste en ligne et le lien nav y mene. Retirer ce commentaire pour la reafficher.
-     Pricing — self-hosting is free; Cloud is metered per participant-minute. 
-    <section class="border-b border-subtle px-8 py-14">
-      <div class="mx-auto flex w-full max-w-7xl flex-col gap-5.5">
-        <div class="flex flex-wrap items-baseline gap-4">
-          <h2 class="text-34 font-semibold tracking-[-0.03em] text-strong">Pricing</h2>
-          <span class="text-14 text-muted">
-            Self-hosting is free and unmetered. Cloud bills per participant-minute, with a spend cap on every plan.
-          </span>
+        <div class="flex flex-wrap justify-between gap-3 border-t border-hairline pt-5 text-13 text-faint">
+          <span>MIT licensed · © 2026 Mathieu Chambaud</span>
+          <span class="sl-num">lumyx.dev · {VERSION} alpha</span>
         </div>
-
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {TIERS.map((t) => (
-            <Card
-              key={t.name}
-              className={`flex flex-col gap-3 p-5 ${t.featured ? "border-accent bg-accent-tint" : ""}`}
-            >
-              <span class={`sl-label ${t.featured ? "text-accent-text" : ""}`}>{t.name}</span>
-              <span class="sl-num text-34 font-medium tracking-[-0.03em] text-strong">
-                {t.price}
-                {t.per ? <span class="text-16 font-normal text-muted">{t.per}</span> : null}
-              </span>
-              <span class="sl-num text-13 text-body">{t.quota}</span>
-              <span class={`text-13 leading-relaxed ${t.featured ? "text-body" : "text-muted"}`}>{t.body}</span>
-              <span class="flex-1" />
-              {t.featured ? (
-                <a
-                  href={`${DOCS_URL}/quickstart`}
-                  data-slot="button"
-                  class={cn(buttonVariants({ variant: 'primary', className: 'no-underline hover:no-underline' }))}
-                >
-                  {t.cta}
-                </a>
-              ) : (
-                <a
-                  href={`${DOCS_URL}/quickstart`}
-                  data-slot="button"
-                  class={cn(buttonVariants({ variant: 'secondary', className: 'no-underline hover:no-underline' }))}
-                >
-                  {t.cta}
-                </a>
-              )}
-            </Card>
-          ))}
-        </div>
-
-        <span class="sl-num text-[12.5px] text-faint">
-          A participant-minute = one minute of one peer in a room. Inbound is never billed. Annual billing takes 20%
-          off Starter and Scale.
-        </span>
       </div>
-    </section>
-    */}
-
-    {/* Three doors out. */}
-    <section class="px-8 py-14">
-      {/* Deux colonnes tant que la carte Pricing est masquee — remettre [1fr_300px_300px] avec elle. */}
-      <div class="mx-auto grid w-full max-w-7xl grid-cols-1 items-end gap-6 lg:grid-cols-[1fr_300px]">
-        <div class="flex flex-col gap-3.5">
-          <h2 class="max-w-110 text-[40px] font-semibold leading-[1.05] tracking-[-0.035em] text-strong text-balance">
-            Next time video gets bad, you&rsquo;ll know why.
-          </h2>
-          <div class="flex flex-wrap items-center gap-3">
-            <a
-              href={`${DOCS_URL}/quickstart`}
-              data-slot="button"
-              class={cn(buttonVariants({ variant: 'primary', size: 'lg', className: 'no-underline hover:no-underline' }))}
-            >
-              Get started
-            </a>
-            <a href={DOCS_URL} class="text-[13.5px] text-muted no-underline hover:text-strong hover:no-underline">
-              Read the docs
-            </a>
-          </div>
-        </div>
-
-        {/* Carte Pricing masquee avec la route app/_pricing.
-        <Card className="flex flex-col gap-2 p-5">
-          <span class="text-[15px] font-semibold text-strong">Simple pricing</span>
-          <span class="text-13 leading-relaxed text-muted">
-            Pay per participant-minute, cap the spend, never get a surprise invoice.
-          </span>
-          <a href="/pricing" class="text-13 font-medium">Explore pricing</a>
-        </Card>
-        */}
-
-        <Card className="flex flex-col gap-2 p-5">
-          <span class="text-[15px] font-semibold text-strong">Self-host</span>
-          <span class="text-13 leading-relaxed text-muted">
-            MIT licensed, one binary, no metering and no account required.
-          </span>
-          <a href={`${DOCS_URL}/self-hosting`} class="text-13 font-medium">Self-hosting docs</a>
-        </Card>
-      </div>
-    </section>
+    </footer>
   </div>
 </Base>
+
+<script>
+  // Scroll reveal. Fail-safe: an element is only hidden once the observer has reported it as
+  // below the fold, so nothing stays invisible if the observer never fires.
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduced && 'IntersectionObserver' in window) {
+    const seen = new WeakSet<Element>();
+    const show = (el: HTMLElement) => {
+      el.style.opacity = '';
+      el.style.transform = '';
+    };
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          const el = e.target as HTMLElement;
+          if (!seen.has(el)) {
+            seen.add(el);
+            if (!e.isIntersecting && e.boundingClientRect.top > 0) {
+              el.style.opacity = '0';
+              el.style.transform = 'translateY(16px)';
+              requestAnimationFrame(() => {
+                const d = el.dataset.reveal ?? '0';
+                el.style.transition = `opacity 560ms ease-out ${d}ms, transform 560ms cubic-bezier(.2,.7,.2,1) ${d}ms`;
+              });
+              return;
+            }
+          }
+          if (e.isIntersecting || e.boundingClientRect.top <= 0) {
+            show(el);
+            io.unobserve(el);
+          }
+        }),
+      { threshold: 0 },
+    );
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => io.observe(el));
+  }
+</script>

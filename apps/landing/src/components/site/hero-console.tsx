@@ -1,177 +1,120 @@
-import * as React from "react";
-import { Copy } from "lucide-react";
-import { Button, Tabs, TabsList, TabsTrigger, MetricCard, MetricGrid, StatusDot, QualityIndicator, LatencyChip, TimeSeriesChart, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge } from '@lumyx/ui';
-import { START, START_TABS, HERO_PEERS, TOPO_LEGEND, series, type StartKey } from "@/lib/site-data";
+import { cx } from "@/lib/cx";
+import { STATUS_TEXT, linePath, severity, statusOf, useRoom } from "@/lib/peer-sim";
 
-/** A live number drifts around its base — it is not tweened, it just changes. */
-function useLive(base: number, jitter: number, period = 2400) {
-  const [v, setV] = React.useState(base);
-  React.useEffect(() => {
-    const id = setInterval(() => setV(Math.max(0, base + (Math.random() * 2 - 1) * jitter)), period);
-    return () => clearInterval(id);
-  }, [base, jitter, period]);
-  return v;
-}
+const ROW_H = 40;
 
-export function QuickStart() {
-  const [tab, setTab] = React.useState<StartKey>("docker");
-  const s = START[tab];
-  return (
-    <div className="flex flex-col gap-3">
-      <Tabs value={tab} onValueChange={(v) => setTab(v as StartKey)}>
-        <TabsList>
-          {START_TABS.map((t) => <TabsTrigger key={t.id} value={t.id}>{t.label}</TabsTrigger>)}
-        </TabsList>
-      </Tabs>
-      <div className="overflow-hidden rounded-lg border border-hairline bg-card">
-        <div className="flex items-center gap-2.5 border-b border-subtle px-[18px] py-3">
-          <span className="sl-label">{s.title}</span>
-          <span className="flex-1" />
-          <Button size="icon" variant="ghost" aria-label="Copy" className="size-7"><Copy /></Button>
-        </div>
-        <div className="flex min-h-[168px] flex-col gap-[7px] px-5 py-[18px]">
-          {s.lines.map((line, i) => (
-            <span key={i} className="whitespace-pre-wrap text-13 leading-relaxed text-body">{line}</span>
-          ))}
-        </div>
-        <div className="border-t border-subtle bg-sunken px-5 py-3">
-          <span className="text-12 text-muted text-pretty">{s.note}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+/* Columns: peer_id · score · rtt · loss · [jitter] · status. Jitter and the score bar appear
+   once the console itself is wide enough (container query), not the viewport. */
+const COLS =
+  "grid-cols-[72px_38px_minmax(0,1fr)_minmax(0,1fr)_78px] @xl:grid-cols-[100px_minmax(0,1fr)_64px_70px_76px_92px]";
 
-export function LiveConsole() {
-  const rtt = Math.round(useLive(38, 6));
-  const jitter = Math.round(useLive(11, 3));
-  const loss = useLive(0.2, 0.14, 2800).toFixed(2);
-  const nack = useLive(6.2, 0.8, 3200).toFixed(2);
-  const [tick, setTick] = React.useState(0);
-  React.useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 2600);
-    return () => clearInterval(id);
-  }, []);
+/** The hero's live room: peers re-sort by quality score every 500 ms. Demo data. */
+export function HeroConsole() {
+  const room = useRoom();
+  const order = [...room.peers].sort((a, b) => a.score - b.score).map((p) => p.id);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-hairline bg-card shadow-[var(--shadow-lg)]">
-      <div className="flex flex-wrap items-center gap-2.5 border-b border-subtle bg-sunken px-[18px] py-3">
-        <StatusDot status="live" />
-        <span className="text-[12.5px] font-medium text-strong">live-classroom</span>
-        <span className="sl-num text-12 text-muted">eu-west-3 · 6 peers · 2.4 Mbps · up 2h 14m</span>
+    <div className="@container flex flex-col overflow-hidden rounded-xs border border-stroke bg-card">
+      <div className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-2 border-b border-hairline px-4 py-2 text-12">
+        <span className="size-[7px] rounded-pill bg-ok-solid animate-breathe motion-reduce:animate-none" />
+        <span className="sl-num text-strong">webinar-us</span>
+        <span className="sl-num text-faint">eu-west-3 · 6 peers</span>
         <span className="flex-1" />
-        <Badge tone="ok">Live</Badge>
+        <span className="rounded-[4px] border border-stroke px-1.5 py-0.5 text-muted">demo data</span>
       </div>
 
-      <MetricGrid columns={5} className="rounded-none border-x-0 border-t-0 shadow-none">
-        <MetricCard label="Round-trip time" value={rtt} unit="ms" threshold="p50 · threshold 200ms" />
-        <MetricCard label="Jitter" value={jitter} unit="ms" threshold="threshold 30ms" />
-        <MetricCard label="Packet loss" value={loss} unit="%" threshold="threshold 2%" />
-        <MetricCard label="NACK ratio" value={nack} unit="%" state="danger" threshold="threshold 5%" />
-        <MetricCard label="Freeze ratio" value="1.40" unit="%" state="warn" threshold="threshold 1%" />
-      </MetricGrid>
-
-      <div className="grid border-t border-subtle lg:grid-cols-[1.4fr_1fr]">
-        <div className="flex min-w-0 flex-col gap-3 border-b border-subtle px-5 py-[18px] lg:border-b-0 lg:border-r">
-          <span className="sl-label">Bitrate per peer — last 30 minutes</span>
-          <TimeSeriesChart
-            height={190}
-            yUnit=" kbps"
-            xLabels={["13:36", "13:43", "13:50", "13:57", "14:06"]}
-            series={[
-              { name: "a3f91c02", color: "var(--series-1)", data: series(60, 2 + tick * 0.4, 2400, 260) },
-              { name: "ff104b2c", color: "var(--danger-solid)", data: series(60, 6 + tick * 0.4, 900, 420) },
-            ]}
-          />
-        </div>
-        <div className="flex min-w-0 flex-col">
-          <div className="px-5 pb-2.5 pt-[18px]"><span className="sl-label">Peers — worst first</span></div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Peer</TableHead>
-                <TableHead>Quality</TableHead>
-                <TableHead className="text-right">Rtt</TableHead>
-                <TableHead className="text-right">Loss</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {HERO_PEERS.map((p) => (
-                <TableRow key={p.peer_id}>
-                  <TableCell>
-                    <span className="sl-num inline-flex items-center gap-2 font-medium text-strong">
-                      <StatusDot status={p.status} />{p.peer_id}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <QualityIndicator quality={p.score >= 85 ? "excellent" : p.score >= 70 ? "good" : p.score >= 40 ? "degraded" : "poor"} />
-                  </TableCell>
-                  <TableCell className="text-right"><LatencyChip ms={p.rtt} plain /></TableCell>
-                  <TableCell className="text-right">
-                    <span className={`sl-num ${p.loss >= 2 ? "text-danger" : "text-muted"}`}>{p.loss.toFixed(2)}%</span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+      <div
+        className={cx(
+          "grid gap-x-2.5 border-b border-hairline px-4 py-2.5 text-11 uppercase tracking-[0.04em] text-faint",
+          COLS,
+        )}
+      >
+        <span>peer_id</span>
+        <span>score</span>
+        <span className="text-right">rtt_ms</span>
+        <span className="text-right">loss</span>
+        <span className="hidden text-right @xl:block">jitter_ms</span>
+        <span className="text-right">status</span>
       </div>
 
-      <div className="grid border-t border-subtle lg:grid-cols-[1fr_300px]">
-        <div className="border-b border-subtle bg-sunken px-[18px] py-3.5 lg:border-b-0 lg:border-r">
-          <Topology />
-        </div>
-        <div className="flex flex-col">
-          {TOPO_LEGEND.map((t) => (
-            <div key={t.title} className="flex flex-col gap-1 border-b border-subtle px-5 py-3">
-              <span className="text-[12.5px] font-medium text-strong">{t.title}</span>
-              <span className="text-12 leading-relaxed text-muted text-pretty">{t.body}</span>
+      <div className="relative" style={{ height: room.peers.length * ROW_H }}>
+        {room.peers.map((p) => {
+          const st = statusOf(p);
+          const bad = st === "bad";
+          return (
+            <div
+              key={p.id}
+              className={cx(
+                "sl-num absolute inset-x-0 top-0 grid h-10 items-center gap-x-2.5 border-b border-subtle px-4 text-13 transition-transform duration-[360ms] ease-[cubic-bezier(.2,.7,.2,1)] motion-reduce:transition-none",
+                COLS,
+                bad && "bg-danger-tint",
+              )}
+              style={{ transform: `translateY(${order.indexOf(p.id) * ROW_H}px)` }}
+            >
+              <span className="text-strong">{p.id}</span>
+              <span className="flex items-center gap-2.5">
+                <span className="w-6" style={{ color: STATUS_TEXT[st] }}>
+                  {p.score}
+                </span>
+                <span className="hidden h-1 max-w-[140px] flex-1 overflow-hidden rounded-pill bg-active @xl:block">
+                  <span className="block h-full" style={{ width: `${p.score}%`, background: STATUS_TEXT[st] }} />
+                </span>
+              </span>
+              <span className="text-right" style={{ color: severity(p.rtt, 150, 200) }}>
+                {Math.round(p.rtt)}
+              </span>
+              <span className="text-right" style={{ color: severity(p.loss, 1, 2) }}>
+                {p.loss.toFixed(2)}%
+              </span>
+              <span className="hidden text-right @xl:block" style={{ color: severity(p.jit, 20, 30) }}>
+                {Math.round(p.jit)}
+              </span>
+              <span
+                className="flex items-center justify-end gap-[7px] text-12"
+                style={{ color: bad ? STATUS_TEXT.bad : STATUS_TEXT.ok }}
+              >
+                <span
+                  className={cx(
+                    "size-1.5 rounded-pill",
+                    !bad && room.live && "animate-breathe motion-reduce:animate-none",
+                  )}
+                  style={{ background: bad ? STATUS_TEXT.bad : STATUS_TEXT.ok }}
+                />
+                {bad ? "degraded" : "live"}
+              </span>
             </div>
-          ))}
+          );
+        })}
+      </div>
+
+      <div className="flex flex-col gap-2.5 border-t border-hairline px-4 pb-3.5 pt-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-12">
+          <span className="flex items-center gap-1.5 text-muted">
+            <span className="h-0.5 w-2.5 bg-accent" />
+            jitter_ms
+          </span>
+          <span className="flex items-center gap-1.5 text-muted">
+            <span className="h-0.5 w-2.5 bg-warn-solid" />
+            packet_loss_ratio
+          </span>
+          <span className="flex-1" />
+          <span className="text-faint">room avg · 30s · 500 ms</span>
+        </div>
+        <svg viewBox="0 0 760 120" preserveAspectRatio="none" className="block h-[110px] w-full" aria-hidden>
+          <line
+            x1="0" x2="760" y1="62" y2="62"
+            stroke="var(--danger-solid)" strokeWidth="1" strokeDasharray="3 4" opacity="0.6"
+            vectorEffect="non-scaling-stroke"
+          />
+          <path d={linePath(room.loss, 6)} fill="none" stroke="var(--warn-solid)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+          <path d={linePath(room.jit, 60)} fill="none" stroke="var(--accent)" strokeWidth="1.75" vectorEffect="non-scaling-stroke" />
+        </svg>
+        <div className="sl-num flex justify-between text-11 text-faint">
+          <span>-30s</span>
+          <span>jitter_ms &gt; 30</span>
+          <span>now</span>
         </div>
       </div>
     </div>
-  );
-}
-
-/** Stroke width is forwarded bitrate; dashed red is a TURN relay on degraded ICE. */
-function Topology() {
-  const peers = [
-    { id: "a3f91c02", x: 120, y: 58, w: 3, tone: "" },
-    { id: "0b8e2f61", x: 500, y: 58, w: 2, tone: "" },
-    { id: "5e7b21f4", x: 80, y: 196, w: 4, tone: "" },
-    { id: "d41f9ab7", x: 540, y: 196, w: 2, tone: "danger" },
-    { id: "9c0d34aa", x: 230, y: 248, w: 2, tone: "" },
-    { id: "2f81be07", x: 400, y: 248, w: 3, tone: "warn" },
-  ];
-  return (
-    <svg viewBox="0 0 620 280" className="block h-[230px] w-full" role="img" aria-label="Room topology">
-      <g fill="none">
-        {peers.map((p) => (
-          <line
-            key={p.id} x1={310} y1={140} x2={p.x} y2={p.y}
-            stroke={p.tone === "danger" ? "var(--danger-solid)" : p.tone === "warn" ? "var(--warn-solid)" : "var(--series-1)"}
-            strokeWidth={p.w}
-            strokeDasharray={p.tone === "danger" ? "5 4" : undefined}
-            opacity={p.tone ? 0.8 : 0.55}
-          />
-        ))}
-      </g>
-      <rect x={256} y={112} width={108} height={56} rx={14} fill="var(--surface-card)" stroke="var(--accent-border)" strokeWidth={1.5} />
-      <text x={310} y={135} textAnchor="middle" fontSize={12.5} fontWeight={600} fill="var(--text-strong)">SFU</text>
-      <text x={310} y={152} textAnchor="middle" fontSize={10.5} fill="var(--text-muted)">forwarding · 6</text>
-      <g fontSize={10.5} fill="var(--text-body)" textAnchor="middle">
-        {peers.map((p) => (
-          <g key={p.id}>
-            <circle
-              cx={p.x} cy={p.y} r={27}
-              fill={p.tone === "danger" ? "var(--danger-tint)" : p.tone === "warn" ? "var(--warn-tint)" : "var(--surface-card)"}
-              stroke={p.tone === "danger" ? "var(--danger-solid)" : p.tone === "warn" ? "var(--warn-solid)" : "var(--border-strong)"}
-            />
-            <text x={p.x} y={p.y + 4}>{p.id}</text>
-          </g>
-        ))}
-      </g>
-    </svg>
   );
 }

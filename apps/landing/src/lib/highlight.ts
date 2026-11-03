@@ -1,63 +1,55 @@
-import type { Lang } from "@/lib/platform-data";
+import type { CodeLang } from "@/lib/home-data";
 
 /**
- * A deliberately small tokenizer — enough to colour the five snippet languages
- * on the landing page without pulling a highlighter into the bundle.
- * Colours are token roles, resolved to design-system CSS variables.
+ * A deliberately small tokenizer — enough to colour the four snippet languages on the home page
+ * without pulling a highlighter into the bundle. Colours are design-system CSS variables.
  */
-export type Role = "comment" | "str" | "num" | "kw" | "key" | "fn" | "punct" | "plain";
+export type Token = { v: string; c: string };
 
-export type Token = { t: string; role: Role };
-
-export const ROLE_COLOR: Record<Role, string> = {
-  comment: "var(--text-faint)",
-  str: "var(--ok)",
-  num: "var(--accent-2)",
-  kw: "var(--accent-text)",
-  key: "var(--text-strong)",
-  fn: "var(--info)",
-  punct: "var(--text-faint)",
-  plain: "var(--text-body)",
+const C = {
+  key: "var(--indigo-400)",
+  str: "var(--coral-400)",
+  num: "var(--green-400)",
+  kw: "var(--amber-400)",
+  dim: "var(--n-500)",
+  txt: "var(--n-200)",
+  sec: "var(--accent-text)",
 };
 
-const KEYWORD =
-  /^(const|let|await|async|return|if|else|new|function|import|from|export|true|false|null|undefined)$/;
+const GENERIC =
+  /("(?:[^"\\]|\\.)*")(\s*:)?|(\s#.*$|\/\/.*$)|\b(\d+(?:\.\d+)?)\b|\b(import|from|const|await|new|true|false)\b|([{}[\](),:;=])/g;
 
-export function tokenize(line: string, lang: Lang): Token[] {
+function generic(s: string): Token[] {
   const out: Token[] = [];
-  let rest = line;
-  let guard = 0;
-
-  const push = (t: string, role: Role) => out.push({ t, role });
-
-  while (rest.length > 0 && guard++ < 400) {
-    let m: RegExpMatchArray | null;
-
-    if ((m = rest.match(/^(\/\/[^\n]*|#[^\n]*)/))) {
-      push(m[0], "comment");
-    } else if ((m = rest.match(/^"[^"]*"|^'[^']*'/))) {
-      const after = rest.slice(m[0].length);
-      push(m[0], lang === "json" && /^\s*:/.test(after) ? "key" : "str");
-    } else if ((m = rest.match(/^-?\d+(\.\d+)?[a-z%]*/))) {
-      push(m[0], "num");
-    } else if ((m = rest.match(/^\[[\w.\-]+\]/))) {
-      push(m[0], "kw");
-    } else if ((m = rest.match(/^[A-Za-z_$][\w$.\-/]*/))) {
-      const word = m[0];
-      const after = rest.slice(word.length);
-      if (KEYWORD.test(word)) push(word, "kw");
-      else if (after.startsWith("(")) push(word, "fn");
-      else if ((lang === "yaml" || lang === "toml") && /^\s*[:=]/.test(after)) push(word, "key");
-      else push(word, "plain");
-    } else if ((m = rest.match(/^\s+/))) {
-      push(m[0], "plain");
-    } else {
-      m = [rest[0]] as unknown as RegExpMatchArray;
-      push(rest[0], "punct");
-    }
-
-    rest = rest.slice(m[0].length);
+  let i = 0;
+  let m: RegExpExecArray | null;
+  GENERIC.lastIndex = 0;
+  while ((m = GENERIC.exec(s))) {
+    if (m.index > i) out.push({ v: s.slice(i, m.index), c: C.txt });
+    if (m[1]) {
+      out.push({ v: m[1], c: m[2] ? C.key : C.str });
+      if (m[2]) out.push({ v: m[2], c: C.dim });
+    } else if (m[3]) out.push({ v: m[3], c: C.dim });
+    else if (m[4]) out.push({ v: m[4], c: C.num });
+    else if (m[5]) out.push({ v: m[5], c: C.kw });
+    else out.push({ v: m[6], c: C.dim });
+    i = GENERIC.lastIndex;
   }
+  if (i < s.length) out.push({ v: s.slice(i), c: C.txt });
+  return out;
+}
 
-  return out.length > 0 ? out : [{ t: " ", role: "plain" }];
+export function tokenize(line: string, lang: CodeLang): Token[] {
+  if (!line.trim()) return [{ v: " ", c: C.txt }];
+  if (/^\s*(#|\/\/)/.test(line)) return [{ v: line, c: C.dim }];
+  if (lang === "toml") {
+    if (/^\s*\[.*\]\s*$/.test(line)) return [{ v: line, c: C.sec }];
+    const m = line.match(/^(\s*)([\w.-]+)(\s*=\s*)(.*)$/);
+    if (m) return [{ v: m[1], c: C.txt }, { v: m[2], c: C.key }, { v: m[3], c: C.dim }, ...generic(m[4])];
+  }
+  if (lang === "prom") {
+    const m = line.match(/^([a-z_]+)(\{[^}]*\})?(\s+)(.*)$/);
+    if (m) return [{ v: m[1], c: C.key }, { v: m[2] ?? "", c: C.str }, { v: m[3], c: C.txt }, { v: m[4], c: C.num }];
+  }
+  return generic(line);
 }
