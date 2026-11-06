@@ -1,16 +1,26 @@
 ---
 title: Metrics reference
-description: Six metrics, read from RTCP as the media passes through the SFU. Each one is armed by default with the threshold below and a 30s debounce, per peer and — where the scope says so — per room.
+description: Six numbers, measured in the media path for every peer and sampled every 500 ms. Each has a default threshold you can change per environment.
 ---
 
-import { MetricDetail, MetricsThresholds } from '@/components/metrics-reference';
+import { Aside } from '@astrojs/starlight/components';
+import { MetricsGlance } from '@/components/metrics-reference';
+import MetricDetail from '@/components/metric-detail.astro';
+import CodePanel from '@/components/code-panel.astro';
+import { tokenizeToml } from '@/lib/json-tokens';
 
 {/* Les ancres sont epinglees en `[#champ]` plutot que laissees a rehype-slug, qui aurait
     renomme `#packet_loss_ratio` en `#packet-loss` et casse les liens profonds existants. */}
 
-## Default thresholds
+<Aside type="note" title="Planned">
+  These metrics describe the RTCP collector, the next milestone of sfu-core. Today the SFU forwards
+  media but does not collect them yet. Names and defaults may change before v1, and alerting on
+  thresholds is on the roadmap.
+</Aside>
 
-<MetricsThresholds />
+## At a glance [#overview]
+
+<MetricsGlance />
 
 ## Packet loss [#packet_loss_ratio]
 
@@ -36,14 +46,29 @@ import { MetricDetail, MetricsThresholds } from '@/components/metrics-reference'
 
 <MetricDetail field="bitrate_kbps" />
 
-## Overriding a threshold
+## Change a threshold [#overrides]
 
-Thresholds live per project and per environment since v0.4.0. Set one and it applies to every room in that
-environment; alerts still debounce for 30s before firing.
-
-```http
-PATCH /v1/projects/live-classroom/thresholds
-
-{ "packet_loss_ratio": 0.03,
-  "rtt_ms": 250 }
-```
+<div class="not-content grid gap-8 min-[1100px]:grid-cols-2">
+  <div class="flex flex-col gap-4 text-16 leading-6 text-body">
+    <p class="m-0">
+      Thresholds will live in <code class="rounded-[4px] bg-inset px-1 font-mono text-14">lumyx.toml</code> and be
+      read at startup. Keep a looser file for staging: a room on a bad office link should not look like an outage.
+    </p>
+    <p class="m-0">A metric counts as crossed only after it stays past the threshold for the full debounce window.</p>
+    <p class="m-0 text-14 text-faint">Draft format. Today the SFU reads environment variables.</p>
+  </div>
+  <CodePanel
+    label="lumyx.staging.toml"
+    class="self-start"
+    lines={[
+      '# lumyx.staging.toml',
+      '[thresholds]',
+      'packet_loss_ratio = 0.05',
+      'rtt_ms = 300',
+      'jitter_ms = 50',
+      'nack_ratio = 0.08',
+      'freeze_ratio = 0.03',
+      'debounce = "120s"',
+    ].map(tokenizeToml)}
+  />
+</div>

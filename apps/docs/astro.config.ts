@@ -29,7 +29,14 @@ export default defineConfig({
       description:
         'Run, self-host and observe a Lumyx SFU: quickstart, deployment, the six media-path metrics and the REST API.',
       social: [{ icon: 'github', label: 'GitHub', href: REPO }],
-      sidebar: sidebarGroups().map((group) => ({ label: group.label, items: group.items })),
+      // Les squelettes portent le badge « Soon » de la maquette Docs v3.
+      sidebar: sidebarGroups().map((group) => ({
+        label: group.label,
+        items: group.items.map((slug) =>
+          stubs.includes(slug) ? { slug, badge: { text: 'Soon', class: 'lumyx-soon' } } : slug,
+        ),
+      })),
+      editLink: { baseUrl: 'https://github.com/lumyx-dev/website/edit/main/apps/docs/' },
       customCss: ['./src/styles/global.css'],
       expressiveCode: false,
       routeMiddleware: './src/route-middleware.ts',
@@ -38,6 +45,9 @@ export default defineConfig({
         ThemeSelect: './src/components/starlight/ThemeSelect.astro',
         PageTitle: './src/components/starlight/PageTitle.astro',
         SiteTitle: './src/components/starlight/SiteTitle.astro',
+        SocialIcons: './src/components/starlight/SocialIcons.astro',
+        PageSidebar: './src/components/starlight/PageSidebar.astro',
+        Footer: './src/components/starlight/Footer.astro',
       },
     }),
     // Voir apps/landing/astro.config.ts : les enfants passes depuis le MDX deviennent des

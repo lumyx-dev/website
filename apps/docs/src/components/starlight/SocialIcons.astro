@@ -1,0 +1,38 @@
+---
+// Remplace les icones sociales de Starlight par la barre de liens de la maquette Docs v3 :
+// retour au site, GitHub, version en pastille. Le bouton de theme suit, rendu par Starlight.
+import { SITE_URL } from '@/lib/env';
+import { REPO, VERSION } from '@/lib/site-data';
+---
+
+<nav aria-label="Lumyx" class="lumyx-links">
+  <a href={SITE_URL}>Product</a>
+  <a href={REPO}>GitHub</a>
+  <span class="lumyx-version sl-num">{VERSION}</span>
+</nav>
+
+<style>
+  .lumyx-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: var(--text-14);
+  }
+  a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 500ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  a:hover {
+    color: var(--text-strong);
+  }
+  .lumyx-version {
+    padding: 2px 8px;
+    border-radius: var(--radius-pill, 999px);
+    background: var(--accent-tint);
+    color: var(--accent-text);
+    font-family: var(--font-mono);
+    font-size: var(--text-12);
+    line-height: 16px;
+  }
+</style>

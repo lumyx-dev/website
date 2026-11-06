@@ -53,9 +53,10 @@
     --sl-color-text: var(--text-body);
     --sl-color-text-accent: var(--accent-text);
     --sl-color-text-invert: var(--text-on-accent);
-    --sl-color-bg: var(--surface-page);
-    --sl-color-bg-nav: var(--surface-page);
-    --sl-color-bg-sidebar: var(--surface-page);
+    /* Fond carte, comme la maquette Docs v3 et la home : blanc en clair. */
+    --sl-color-bg: var(--surface-card);
+    --sl-color-bg-nav: var(--surface-card);
+    --sl-color-bg-sidebar: var(--surface-card);
     --sl-color-bg-inline-code: var(--code-bg);
     --sl-color-bg-accent: var(--accent);
     --sl-color-hairline-light: var(--border-hairline);
@@ -93,8 +94,9 @@
     --sl-text-code: var(--text-code);
     --sl-text-code-sm: var(--text-code);
 
-    /* Grille Lumyx : la prose tient 680px. */
-    --sl-content-width: 680px;
+    /* Maquette Docs v3 : la colonne tient 880px pour les sections a deux colonnes ; la prose,
+       elle, reste a 680px (regle `.sl-markdown-content > p` plus bas). */
+    --sl-content-width: 880px;
   }
 
   /* Titres de section de la sidebar : le seul manierisme typographique du systeme, par son
@@ -103,30 +105,205 @@
     @apply sl-label;
   }
 
-  /* En-tete de page (src/components/starlight/PageTitle.astro). */
+  /* En-tete de page (src/components/starlight/PageTitle.astro), maquette Docs v3. */
   .lumyx-crumb {
-    margin: 0 0 0.5rem;
-    font-size: var(--text-12);
-    line-height: var(--text-12--line-height);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    font-size: var(--text-14);
+    line-height: 20px;
     color: var(--text-faint);
+  }
+  .lumyx-crumb-sep {
+    font-size: 12px;
+    color: var(--border-strong);
+  }
+  .lumyx-crumb-current {
+    color: var(--text-strong);
   }
   .lumyx-title {
     margin: 0;
-    font-size: var(--text-44);
-    line-height: var(--text-44--line-height);
+    font-size: 36px;
+    line-height: 1;
     font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--text-strong);
-    text-wrap: pretty;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+    /* Le degrade de la maquette, porte par les tokens : il suit le theme. */
+    background: linear-gradient(90deg, var(--text-strong), var(--text-muted));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  @media (min-width: 40rem) {
+    .lumyx-title {
+      font-size: 48px;
+    }
   }
   .lumyx-lead {
     margin: 1rem 0 0;
     max-width: 680px;
-    font-size: var(--text-16);
-    letter-spacing: var(--text-16--letter-spacing);
-    line-height: 1.625;
+    font-size: 18px;
+    line-height: 28px;
     color: var(--text-muted);
     text-wrap: pretty;
+  }
+  .lumyx-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin: 1rem 0 0;
+    font-size: var(--text-14);
+    line-height: 20px;
+    color: var(--text-faint);
+  }
+  .lumyx-meta a {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .lumyx-meta a:hover {
+    color: var(--text-strong);
+  }
+
+  /* La prose garde 680px dans la colonne de 880px. */
+  .sl-markdown-content > :is(p, ul, ol) {
+    max-width: 680px;
+  }
+
+  /* En-tete du site : translucide et floute, comme la home. */
+  .page > .header {
+    background-color: color-mix(in srgb, var(--surface-card) 80%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Bouton de recherche (Pagefind) : le champ gris de la maquette, ⌘K compris. */
+  site-search button[data-open-modal] {
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-xs);
+    background-color: var(--surface-sunken);
+    color: var(--text-faint);
+    font-size: var(--text-14);
+  }
+  site-search button[data-open-modal]:hover {
+    border-color: var(--border-strong);
+    color: var(--text-muted);
+  }
+
+  /* Sidebar : liens en pastilles arrondies, page courante en teinte d'accent. */
+  .sidebar-content a {
+    padding: 4px 12px;
+    border-radius: var(--radius-xs);
+    font-size: var(--text-14);
+    color: var(--text-muted);
+    transition: background-color 500ms cubic-bezier(0.32, 0.72, 0, 1), color 500ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .sidebar-content a:hover {
+    background-color: var(--surface-hover);
+    color: var(--text-strong);
+  }
+  .sidebar-content .lumyx-soon {
+    border: 0;
+    background: transparent;
+    font-size: var(--text-12);
+    font-weight: 400;
+    color: var(--text-faint);
+  }
+
+  /* Sommaire de droite : un filet a gauche, l'entree active marquee en accent. */
+  starlight-toc h2,
+  mobile-starlight-toc .toggle {
+    @apply sl-label;
+  }
+  starlight-toc nav a {
+    padding: 4px 0 4px calc(12px + var(--depth, 0) * 12px);
+    font-size: var(--text-14);
+    line-height: 20px;
+    color: var(--text-muted);
+    box-shadow: inset 1px 0 0 var(--border-hairline);
+    transition: color 500ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  starlight-toc nav a:hover {
+    color: var(--text-strong);
+  }
+  starlight-toc nav a[aria-current='true'] {
+    color: var(--accent-text);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+
+  /* Encart « New to Lumyx? » sous le sommaire (src/components/starlight/PageSidebar.astro). */
+  .lumyx-newcomer {
+    box-sizing: border-box;
+    width: calc(var(--sl-sidebar-width) - 2 * var(--sl-sidebar-pad-x));
+    max-width: calc(100% - 2 * var(--sl-sidebar-pad-x));
+    margin: 1.5rem var(--sl-sidebar-pad-x) 0;
+    padding: 1rem;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-sunken);
+  }
+  .lumyx-newcomer-title {
+    margin: 0;
+    font-size: var(--text-14);
+    font-weight: 600;
+    color: var(--text-strong);
+  }
+  .lumyx-newcomer-body {
+    margin: 0.5rem 0 0;
+    font-size: var(--text-12);
+    line-height: 16px;
+    color: var(--text-muted);
+  }
+  .lumyx-newcomer-cta {
+    display: inline-flex;
+    margin-top: 0.75rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-xs);
+    background: var(--text-strong);
+    color: var(--surface-page);
+    font-size: var(--text-14);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .lumyx-newcomer-cta:hover {
+    background: var(--text-body);
+    color: var(--surface-page);
+  }
+
+  /* Encart de note : la carte grise de la maquette plutot qu'un aplat colore. */
+  .sl-markdown-content .starlight-aside--note {
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-lg);
+    background: var(--surface-sunken);
+    color: var(--text-muted);
+  }
+  .sl-markdown-content .starlight-aside--note .starlight-aside__title {
+    color: var(--text-strong);
+  }
+
+  /* Page precedente / suivante : des cartes, sans ombre. */
+  .lumyx-footer {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border-hairline);
+  }
+  .lumyx-footer .pagination-links a {
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: none;
+    color: var(--text-faint);
+    font-size: var(--text-12);
+    transition: border-color 600ms cubic-bezier(0.32, 0.72, 0, 1), transform 600ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .lumyx-footer .pagination-links a:hover {
+    border-color: var(--text-faint);
+    transform: translateY(-2px);
+  }
+  .lumyx-footer .pagination-links .link-title {
+    font-size: var(--text-16);
+    font-weight: 600;
+    color: var(--text-strong);
   }
 
   /* `##` ouvre une section par une hairline : le rythme visuel de l'ancienne doc. */
@@ -138,15 +315,16 @@
   /* Starlight enveloppe chaque titre dans `.sl-heading-wrapper` avec son lien d'ancre, et le
      <h2> y est `inline` : la hairline se pose sur l'enveloppe, sinon elle ne couvre que le texte. */
   .sl-markdown-content .sl-heading-wrapper.level-h2:not(:first-child) {
-    margin-top: 2rem;
-    padding-top: 2rem;
+    margin-top: 3rem;
+    padding-top: 3rem;
     border-top: 1px solid var(--border-hairline);
   }
 
   /* Page courante dans la sidebar : la teinte d'accent, pas un aplat plein. */
   .sidebar-content a[aria-current='page'] {
     background-color: var(--accent-tint);
-    color: var(--text-strong);
+    color: var(--accent-text);
+    font-weight: 600;
   }
 
   /* Bloc de code : la bordure du design system, le palier `text-code` en Geist Mono. Le fond vient

@@ -1,0 +1,22 @@
+---
+// Le sommaire de Starlight, suivi de l'encart « New to Lumyx? » de la maquette Docs v3.
+// L'encart vit dans la colonne de droite : il n'apparait que la ou elle existe (page avec
+// sommaire, ecran large), et pas sur le quickstart lui-meme.
+import Default from '@astrojs/starlight/components/PageSidebar.astro';
+
+const { toc, id } = Astro.locals.starlightRoute;
+const showNewcomer = Boolean(toc) && id !== 'quickstart';
+---
+
+<Default><slot /></Default>
+{
+  showNewcomer && (
+    <aside class="lumyx-newcomer sl-hidden lg:sl-block" aria-label="Quickstart">
+      <p class="lumyx-newcomer-title">New to Lumyx?</p>
+      <p class="lumyx-newcomer-body">Run the SFU in one command and open your first room.</p>
+      <a href="/quickstart" class="lumyx-newcomer-cta">
+        Quickstart
+      </a>
+    </aside>
+  )
+}
