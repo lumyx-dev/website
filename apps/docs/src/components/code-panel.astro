@@ -1,0 +1,25 @@
+---
+// Panneau de code de la maquette Docs v3 : toujours sombre, nom de fichier, bouton Copy.
+import { CopyButton } from './copy-button';
+import type { Token } from '@/lib/json-tokens';
+
+interface Props {
+  label: string;
+  lines: Token[][];
+  class?: string;
+}
+const { label, lines, class: className } = Astro.props;
+const text = lines.map((l) => l.map((t) => t.v).join('')).join('\n');
+---
+
+<div class:list={['not-content dark overflow-hidden rounded-lg bg-page text-body', className]}>
+  <div class="flex items-center justify-between border-b border-hairline py-2 pl-4 pr-2">
+    <span class="font-mono text-12 text-muted">{label}</span>
+    <CopyButton client:visible text={text} />
+  </div>
+  <pre class="m-0 overflow-x-auto bg-transparent p-4 font-mono text-13 leading-5"><code>{
+    lines.map((line) => (
+      <div class="min-h-5 whitespace-pre">{line.map((t) => <span class={t.cls}>{t.v}</span>)}</div>
+    ))
+  }</code></pre>
+</div>

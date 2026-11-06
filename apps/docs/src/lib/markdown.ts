@@ -1,4 +1,6 @@
 import { lumyxCodeTheme } from '@lumyx/ui/code-theme';
+import { satteri } from '@astrojs/markdown-satteri';
+import { pinnedHeadingIds } from './heading-ids';
 
 /**
  * Coloration du code. Expressive Code (le defaut de Starlight) est coupe : il calcule ses propres
@@ -8,4 +10,5 @@ import { lumyxCodeTheme } from '@lumyx/ui/code-theme';
  */
 export const markdown = {
   shikiConfig: { theme: lumyxCodeTheme },
+  processor: satteri({ mdastPlugins: [pinnedHeadingIds] }),
 };

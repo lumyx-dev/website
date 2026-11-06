@@ -2,7 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import { METRICS } from "./metrics-data";
-import { MetricsThresholds } from "../components/metrics-reference";
+import { MetricsGlance } from "../components/metrics-reference";
+import { tokenizeJson } from "./json-tokens";
 
 describe("donnees des metriques", () => {
   test("porte les six metriques du collecteur", () => {
@@ -33,29 +34,36 @@ describe("donnees des metriques", () => {
   });
 });
 
-describe("MetricsThresholds", () => {
-  // Le tableau recapitulatif est la seule vue d'ensemble des six metriques : une ligne perdue
-  // ne casse rien et ne se voit pas. On compte donc les cellules et on verifie que chaque valeur
-  // des donnees arrive bien dans le rendu.
-  const html = renderToStaticMarkup(createElement(MetricsThresholds));
+describe("MetricsGlance", () => {
+  // La grille « At a glance » est la seule vue d'ensemble des six metriques : une carte perdue
+  // ne casse rien et ne se voit pas. On compte les cartes et on verifie leurs valeurs.
+  const html = renderToStaticMarkup(createElement(MetricsGlance));
 
-  test("rend les six lignes sur les six colonnes", () => {
-    expect(html.match(/<th\b/g) ?? []).toHaveLength(6);
-    expect(html.match(/<tr\b/g) ?? []).toHaveLength(METRICS.length + 1);
-    expect(html.match(/<td\b/g) ?? []).toHaveLength(METRICS.length * 6);
+  test("rend une carte par metrique, qui renvoie a sa section", () => {
+    expect(html.match(/<a\b/g) ?? []).toHaveLength(METRICS.length);
+    for (const m of METRICS) expect(html).toContain(`href="#${m.field}"`);
   });
 
-  test("chaque metrique y porte ses six valeurs", () => {
+  test("chaque carte porte le nom, le seuil, ce qu'elle casse et le champ", () => {
     for (const m of METRICS) {
-      for (const value of [m.name, m.field, m.unit, m.threshold, m.scope, m.breaks]) {
+      for (const value of [m.name, m.threshold, m.breaks, m.field]) {
         expect(html).toContain(escapeHtml(value));
       }
     }
   });
 
-  test("la colonne des seuils garde les chiffres tabulaires", () => {
-    // `sl-num` est ce qui aligne verticalement `> 2%`, `> 200ms` et `< 100kbps`.
+  test("les seuils gardent les chiffres tabulaires", () => {
     expect(html.match(/class="[^"]*\bsl-num\b[^"]*"/g) ?? []).toHaveLength(METRICS.length);
+  });
+});
+
+describe("tokenizeJson", () => {
+  test("restitue chaque ligne d'exemple a l'identique", () => {
+    for (const m of METRICS) {
+      for (const line of m.sample) {
+        expect(tokenizeJson(line).map((t) => t.v).join("")).toBe(line);
+      }
+    }
   });
 });
 

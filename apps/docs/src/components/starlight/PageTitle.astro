@@ -1,15 +1,41 @@
 ---
-// Remplace le PageTitle de Starlight : fil d'Ariane (nom de la section), titre au palier 44 et
-// chapo au palier 16, comme sous Fumadocs. L'id `_top` est celui que Starlight attend.
-const { entry, sidebar } = Astro.locals.starlightRoute;
+// Remplace le PageTitle de Starlight (maquette Docs v3) : fil d'Ariane Docs › section › page,
+// titre en degrade, chapo, puis la version et le lien d'edition. L'id `_top` est celui que
+// Starlight attend.
+import { Icon } from '@astrojs/starlight/components';
+import { VERSION } from '@/lib/site-data';
+
+const { entry, sidebar, editUrl } = Astro.locals.starlightRoute;
 type SidebarEntry = (typeof sidebar)[number];
 
 function hasCurrent(e: SidebarEntry): boolean {
   return e.type === 'link' ? e.isCurrent : e.entries.some(hasCurrent);
 }
 const section = sidebar.find((e) => e.type === 'group' && hasCurrent(e))?.label;
+const crumbs = ['Docs', section].filter(Boolean) as string[];
 ---
 
-{section && <p class="lumyx-crumb sl-num">{section}</p>}
+<nav aria-label="Breadcrumb" class="lumyx-crumb">
+  {
+    crumbs.map((c) => (
+      <>
+        <span>{c}</span>
+        <Icon name="right-caret" class="lumyx-crumb-sep" />
+      </>
+    ))
+  }
+  <span class="lumyx-crumb-current" aria-current="page">{entry.data.title}</span>
+</nav>
 <h1 id="_top" class="lumyx-title">{entry.data.title}</h1>
 {entry.data.description && <p class="lumyx-lead">{entry.data.description}</p>}
+<p class="lumyx-meta">
+  <span class="sl-num">Lumyx {VERSION}</span>
+  {
+    editUrl && (
+      <>
+        <span aria-hidden="true">·</span>
+        <a href={editUrl}>Edit on GitHub</a>
+      </>
+    )
+  }
+</p>
