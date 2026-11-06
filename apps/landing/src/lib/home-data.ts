@@ -180,10 +180,6 @@ export const FAQ: { q: string; a: string }[] = [
     a: "No. Clients speak plain JSON over a WebSocket and use the browser’s RTCPeerConnection. There is nothing to install.",
   },
   {
-    q: "How is it different from LiveKit?",
-    a: "Both forward media. Lumyx is built to keep per peer call quality inside the forwarder, so loss, jitter and round trip time come without an exporter and a Grafana stack.",
-  },
-  {
     q: "Which metrics will it collect?",
     a: "Packet loss ratio, jitter, round trip time, NACK ratio, freeze ratio and bitrate, per peer and per room, every 500 ms. The collector is planned.",
   },
