@@ -14,7 +14,7 @@ export function useCopy() {
   return { copied, copy };
 }
 
-/** Small outlined "Copy" button used in panel headers. */
+/** Small "Copy" button used in panel headers. */
 export function CopyButton({ text, className }: { text: string; className?: string }) {
   const { copied, copy } = useCopy();
   return (
@@ -23,7 +23,7 @@ export function CopyButton({ text, className }: { text: string; className?: stri
       onClick={() => copy(text)}
       aria-label={copied ? "Copied" : "Copy to clipboard"}
       className={cx(
-        "h-7 flex-none rounded-[6px] border border-stroke bg-transparent px-2.5 text-12 text-muted transition-transform hover:text-strong active:scale-[0.98]",
+        "flex-none cursor-pointer rounded-xs border border-stroke bg-transparent px-3 py-1 text-12 text-muted transition-colors hover:text-strong active:scale-[0.98]",
         className,
       )}
     >
@@ -32,18 +32,18 @@ export function CopyButton({ text, className }: { text: string; className?: stri
   );
 }
 
-/** The one-line command in the hero: the whole row is the copy target. */
+/** The one-line command in the hero, styled as a secondary button: the whole button copies. */
 export function CopyCommand({ command }: { command: string }) {
   const { copied, copy } = useCopy();
   return (
     <button
       type="button"
       onClick={() => copy(command)}
-      className="flex min-h-11 max-w-[560px] cursor-pointer items-center gap-3 rounded-xs border border-stroke bg-sunken py-2 pl-4 pr-2 text-left text-13 transition-[transform,border-color] hover:border-faint active:scale-[0.98]"
+      className="inline-flex max-w-full cursor-pointer items-center gap-2 rounded-sm border border-stroke bg-card px-3 py-2 text-left text-14 font-medium leading-5 text-strong transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:border-faint active:scale-[0.98]"
     >
       <span className="text-faint">$</span>
-      <span className="sl-num min-w-0 flex-1 leading-normal text-body [overflow-wrap:anywhere]">{command}</span>
-      <span aria-live="polite" className="flex-none rounded-[6px] bg-hover px-2 py-1 text-12 text-muted">
+      <span className="sl-num min-w-0 [overflow-wrap:anywhere]">{command}</span>
+      <span aria-live="polite" className="flex-none rounded-[6px] bg-inset px-2 text-12 leading-5 text-muted">
         {copied ? "Copied" : "Copy"}
       </span>
     </button>

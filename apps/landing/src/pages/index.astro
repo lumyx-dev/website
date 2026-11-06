@@ -1,44 +1,60 @@
 ---
 import Base from '@/layouts/base.astro';
-import { LumyxMark, buttonVariants, cn } from '@lumyx/ui';
+import { LumyxMark, cn } from '@lumyx/ui';
 import { ThemeToggle } from '@/components/site/theme-toggle';
 import { CopyCommand } from '@/components/site/copy';
-import { HeroConsole } from '@/components/site/hero-console';
-import { RoomTopology } from '@/components/site/room-topology';
-import { ConfigPanel } from '@/components/site/config-panel';
+import { MobileNav } from '@/components/site/mobile-nav';
+import { IncidentWindow } from '@/components/site/incident-window';
+import { ProductTabs } from '@/components/site/product-tabs';
 import { StartTerminal } from '@/components/site/start-terminal';
-import { DOCS_URL, REPO, VERSION } from '@/lib/site-data';
+import { REPO, VERSION } from '@/lib/site-data';
 import {
+  CHECKS,
   DOCKER_RUN,
-  FEATURE_GROUPS,
+  FACTS,
+  FAQ,
   FOOTER_COLS,
-  METRIC_NAMES,
   NAV,
-  NOS,
-  PAINS,
-  PLANNED,
-  TOPO_LEGEND,
-  WORKS,
+  PILLARS,
+  QS_STEPS,
+  QUICKSTART,
+  STACK,
+  STATEMENT,
 } from '@/lib/home-data';
+import { DOT, INK } from '@/lib/tone';
+import { BTN_DARK, BTN_LIGHT, BTN_MD, BTN_SM, GRAD, H2, LINK, PAD, SECTION } from '@/lib/ui';
 import { organizationJsonLd, softwareApplicationJsonLd } from '@/lib/schema';
 
 /**
- * The home page — design "Lumyx Home" (Claude Design).
- * Static layout in Astro; the live console, topology, config panel and terminal are islands.
- * The two simulated islands share one store (src/lib/peer-sim.ts), so they tick together.
+ * The home page — design "Lumyx Home v3" (Claude Design).
+ * Static layout in Astro; the mobile menu, incident window, product tabs and terminal are islands.
+ * Colours come from the @lumyx/ui tokens, so both themes work.
  */
 
-const WRAP = 'mx-auto box-border w-full max-w-[1440px] px-[clamp(20px,5vw,64px)]';
-const SECTION_GAP = 'pt-[clamp(88px,10vw,144px)]';
-const H2 = 'm-0 text-[clamp(30px,3.2vw,42px)] font-semibold leading-[1.08] tracking-[-0.035em] text-strong text-balance';
-const EYEBROW = 'sl-num text-13 text-accent-text';
-const BTN = 'no-underline hover:no-underline active:scale-[0.98]';
-const QUICKSTART = `${DOCS_URL}/quickstart`;
+const H1 = `m-0 text-[36px] leading-none tracking-[-0.045em] text-balance min-[640px]:text-[48px] min-[1100px]:text-[60px] ${GRAD}`;
+const LEAD = 'm-0 text-[18px] leading-7 text-muted text-pretty';
+const CELL = 'border-hairline min-[960px]:border-r min-[960px]:last:border-r-0 max-[959px]:border-b max-[959px]:last:border-b-0';
+
+// The statement is lit word by word on scroll; highlighted phrases stay whole.
+type Word = { w: string; key: boolean };
+const WORDS = STATEMENT.flatMap(([t, key]): Word[] =>
+  key ? [{ w: t, key }] : t.split(' ').map((w) => ({ w, key })),
+);
+
+// One deterministic strip of packets; the lost ones are drawn full height in red.
+const rnd = (i: number) => {
+  const x = Math.sin(i * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+};
+const PACKETS = Array.from({ length: 200 }, (_, i) => {
+  const lost = rnd(i) > 0.965;
+  return { lost, h: lost ? 64 : Math.round(20 + rnd(i + 7) * 36) };
+});
 ---
 
 <Base
-  title="Lumyx — the WebRTC SFU that tells you why the call was bad"
-  description="Open-source Rust SFU with observability in the media path: jitter, packet loss, RTT, NACK ratio, freeze ratio — per peer, per room, live."
+  title="Lumyx · The WebRTC SFU that tells you why"
+  description="Lumyx is an open source WebRTC SFU written in Rust. It reads RTCP as packets pass through, so when a call breaks you see which peer and why."
 >
   <script
     is:inline
@@ -46,282 +62,373 @@ const QUICKSTART = `${DOCS_URL}/quickstart`;
     set:html={JSON.stringify([organizationJsonLd(), softwareApplicationJsonLd()]).replace(/</g, '\\u003c')}
   />
 
-  <div class="min-h-dvh overflow-x-clip bg-page text-body">
-    {/* 1 · Nav */}
-    <header class="sticky top-0 z-20 border-b border-hairline bg-page">
-      <div class={cn(WRAP, 'flex h-16 items-center gap-8')}>
-        <a href="/" class="flex items-center gap-2.5 text-strong no-underline hover:text-strong hover:no-underline">
-          <LumyxMark size={18} className="text-accent" />
-          <span class="text-16 font-semibold tracking-[-0.02em]">Lumyx</span>
-        </a>
-        <nav class="hidden gap-7 text-14 min-[900px]:flex">
-          {NAV.map((n) => (
-            <a href={n.href} class="text-muted no-underline hover:text-strong hover:no-underline">{n.label}</a>
-          ))}
-        </nav>
-        <span class="flex-1"></span>
-        <ThemeToggle client:load />
-        <a href={QUICKSTART} data-slot="button" class={cn(buttonVariants({ variant: 'primary', size: 'sm' }), BTN)}>
-          Get started
-        </a>
-      </div>
-    </header>
-
-    {/* 2 · Hero — copy left, the live console right */}
-    <section
-      class={cn(
-        WRAP,
-        'grid grid-cols-1 items-start gap-[clamp(40px,5vw,72px)] pb-[clamp(48px,6vw,80px)] pt-[clamp(48px,7vw,96px)] min-[900px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]',
-      )}
+  <div class="relative min-h-dvh overflow-x-clip bg-card text-body [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-semibold">
+    <a
+      href="#main"
+      class="absolute -top-12 left-4 z-[80] rounded-xs bg-strong px-3 py-2 font-semibold text-page no-underline focus:top-4 hover:text-page"
     >
-      <div class="flex min-w-0 flex-col gap-7 pt-2">
-        <a
-          href={`${REPO}#project-status`}
-          class="inline-flex flex-col items-start gap-2.5 self-start text-13 leading-[1.4] text-body no-underline hover:text-strong hover:no-underline min-[1180px]:min-h-7 min-[1180px]:flex-row min-[1180px]:items-center min-[1180px]:rounded-[14px] min-[1180px]:border min-[1180px]:border-stroke min-[1180px]:py-0.5 min-[1180px]:pl-1 min-[1180px]:pr-3"
-        >
-          <span class="rounded-pill bg-accent-tint px-2 py-0.5 text-12 font-medium text-accent-text">Alpha {VERSION}</span>
-          ICE, DTLS, SRTP and RTP forwarding work end to end
-        </a>
-        <h1 class="m-0 text-[clamp(40px,5vw,62px)] font-semibold leading-[1.02] tracking-[-0.035em] text-strong text-balance">
-          Ship real-time video you can actually debug
-        </h1>
-        <p class="m-0 max-w-[520px] text-[clamp(16px,1.4vw,18px)] leading-[1.55] text-muted text-pretty">
-          An open-source WebRTC SFU in Rust. It reads RTCP as packets pass through, so when a call goes bad you see{' '}
-          <span class="text-strong">which peer</span> and <span class="text-strong">why</span>.
-        </p>
-        <div class="flex flex-wrap gap-3">
-          <a href={QUICKSTART} data-slot="button" class={cn(buttonVariants({ variant: 'primary', size: 'lg' }), BTN)}>
-            Read the Quickstart
-          </a>
-          <a href={REPO} data-slot="button" class={cn(buttonVariants({ variant: 'secondary', size: 'lg' }), BTN)}>
-            View on GitHub
-          </a>
-        </div>
-        <CopyCommand client:idle command={DOCKER_RUN} />
-      </div>
+      Skip to content
+    </a>
 
-      <div class="min-w-0">
-        <HeroConsole client:load />
-      </div>
-    </section>
-
-    {/* 3 · Metrics marquee */}
-    <div class="flex h-11 items-center overflow-hidden border-y border-hairline" aria-hidden="true">
-      <div class="sl-num flex gap-12 whitespace-nowrap pl-12 text-13 text-faint animate-[sl-marquee_48s_linear_infinite] motion-reduce:animate-none">
-        {[...METRIC_NAMES, ...METRIC_NAMES].map((m) => <span>{m}</span>)}
-      </div>
+    {/* Page rails */}
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-y-0 left-1/2 z-[1] w-[min(1200px,calc(100%-32px))] -translate-x-1/2 border-x border-hairline"
+    >
     </div>
 
-    {/* 4 · Three pains, zig-zag */}
-    <section id="product" class={cn(WRAP, 'flex scroll-mt-20 flex-col gap-[clamp(64px,8vw,112px)] pt-[clamp(72px,9vw,128px)]')}>
-      {PAINS.map((p, i) => (
-        <div data-reveal="0" class="grid grid-cols-1 items-center gap-[clamp(32px,5vw,80px)] min-[900px]:grid-cols-2">
-          <div class={cn('flex min-w-0 max-w-[540px] flex-col gap-[18px]', i % 2 === 1 && 'min-[900px]:order-2 min-[900px]:justify-self-end')}>
-            <span class={EYEBROW}>{p.n}</span>
-            <h2 class="m-0 text-[clamp(28px,3vw,38px)] font-semibold leading-[1.1] tracking-[-0.03em] text-strong text-balance">{p.title}</h2>
-            <p class="m-0 text-16 leading-[1.6] text-muted text-pretty">{p.body}</p>
+    {/* Nav */}
+    <header class="sticky top-0 z-50 border-b border-hairline bg-card/80 backdrop-blur-[16px]">
+      <nav aria-label="Main" class="mx-auto flex h-16 max-w-[1200px] items-center gap-8 px-6">
+        <a href="/#top" class="flex items-center gap-2 text-strong no-underline hover:text-strong hover:no-underline">
+          <LumyxMark size={20} className="text-accent" />
+          <span class="text-16 font-semibold tracking-[-0.02em]">Lumyx</span>
+        </a>
+        <div class="hidden gap-6 text-14 min-[960px]:flex">
+          {NAV.map((n) => <a href={n.href} class={LINK}>{n.label}</a>)}
+        </div>
+        <span class="flex-1"></span>
+        <ThemeToggle client:load />
+        <a href={REPO} class={cn(BTN_LIGHT, BTN_SM, 'hidden min-[960px]:inline-flex')}>
+          <svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true" class="fill-strong">
+            <path
+              d="M119.8 32a72 72 0 0 0-23 140.3c3.6.7 4.9-1.5 4.9-3.4v-12c-20 4.4-24.2-9.6-24.2-9.6-3.3-8.3-8-10.5-8-10.5-6.5-4.5.5-4.4.5-4.4 7.2.5 11 7.4 11 7.4 6.4 11 16.8 7.8 20.9 6 .7-4.7 2.5-7.8 4.6-9.6-16-1.8-32.8-8-32.8-35.6a27.9 27.9 0 0 1 7.4-19.3c-.7-1.8-3.2-9.1.7-19 0 0 6-1.9 19.8 7.4a68.1 68.1 0 0 1 36 0c13.7-9.3 19.8-7.4 19.8-7.4 3.9 9.9 1.4 17.2.7 19a27.8 27.8 0 0 1 7.4 19.3c0 27.7-16.9 33.8-32.9 35.6 2.6 2.2 4.9 6.6 4.9 13.3v19.7c0 1.9 1.3 4.1 5 3.4A72 72 0 0 0 119.8 32z"
+            ></path>
+          </svg>
+          GitHub
+        </a>
+        <a href="/#start" class={cn(BTN_DARK, BTN_SM, 'hidden min-[640px]:inline-flex')}>Quickstart</a>
+        <MobileNav client:idle links={NAV} />
+      </nav>
+    </header>
+
+    <main id="main" class="relative z-[2]">
+      {/* Hero */}
+      <section id="top" class={cn(SECTION, 'scroll-mt-16 px-4 py-16 min-[640px]:px-6 min-[640px]:py-24')}>
+        <div class="grid items-end gap-8 min-[960px]:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+          <div data-reveal="0" class="flex flex-col gap-6">
+            <a
+              href="/#status"
+              class="inline-flex items-center gap-2 self-start rounded-pill border border-stroke py-1 pl-1 pr-3 text-14 text-muted no-underline hover:text-strong hover:no-underline"
+            >
+              <span class="rounded-pill bg-accent-tint px-2 py-0.5 font-semibold text-accent-text">Alpha {VERSION}</span>
+              Forwarding works end to end
+            </a>
+            <h1 class={cn(H1, 'max-w-[680px]')}>Live video that<br />tells you why it broke</h1>
           </div>
-          <div class="min-w-0 overflow-hidden rounded-xs border border-stroke bg-card">
-            <div class="flex h-10 items-center justify-between border-b border-hairline px-4 text-12">
-              <span class="sl-label">Proof</span>
-              <span class="sl-num text-faint">{p.src}</span>
+          <div data-reveal="120" class="flex max-w-[440px] flex-col gap-6">
+            <p class={LEAD}>
+              An open source WebRTC SFU in Rust. It reads every RTCP report as packets pass, so a frozen call comes with a
+              cause attached.
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <a href={QUICKSTART} class={cn(BTN_DARK, BTN_MD)}>Read the quickstart</a>
+              <CopyCommand client:idle command={DOCKER_RUN} />
             </div>
-            {p.kv.map((kv) => (
-              <div class="sl-num flex items-baseline justify-between gap-4 border-b border-subtle px-4 py-[11px] text-13 last:border-b-0">
-                <span class="min-w-0 text-muted [overflow-wrap:anywhere]">{kv.k}</span>
-                <span class={cn('text-right', kv.faint ? 'text-faint' : 'text-strong')}>{kv.v}</span>
-              </div>
-            ))}
           </div>
         </div>
-      ))}
-    </section>
 
-    {/* 5 · Room topology — the signature section */}
-    <section id="topology" class={cn(WRAP, 'flex scroll-mt-20 flex-col gap-8 pt-[clamp(88px,10vw,144px)]')}>
-      <div data-reveal="0" class="flex flex-wrap items-end justify-between gap-x-12 gap-y-5">
-        <div class="flex max-w-[640px] flex-col gap-3.5">
-          <span class={EYEBROW}>Room topology</span>
-          <h2 class="m-0 text-[clamp(32px,3.6vw,46px)] font-semibold leading-[1.05] tracking-[-0.035em] text-strong text-balance">
-            See the path every packet takes
-          </h2>
-          <p class="m-0 text-16 leading-[1.6] text-muted text-pretty">
-            One room, drawn from what the forwarder sees. Edge width is bitrate. Pulse speed is round-trip time. The
-            dashed edge is the peer your users are complaining about.
-          </p>
-        </div>
-        <div class="flex flex-wrap gap-x-5 gap-y-2.5 text-12 text-muted">
-          {TOPO_LEGEND.map((l) => (
-            <span class="flex items-center gap-2">
-              {l.kind === 'line' && <span class="h-[3px] w-[22px] bg-faint"></span>}
-              {l.kind === 'dashed' && <span class="h-0 w-[22px] border-t-2 border-dashed border-danger-solid"></span>}
-              {l.kind === 'warn' && <span class="size-2.5 rounded-pill border-2 border-warn-solid"></span>}
-              {l.kind === 'bad' && <span class="size-2.5 rounded-pill border-2 border-danger-solid"></span>}
-              {l.label}
-            </span>
-          ))}
-        </div>
-      </div>
-      <div data-reveal="80">
-        <RoomTopology client:visible />
-      </div>
-    </section>
-
-    {/* 6 · Configure */}
-    <section class={cn(WRAP, SECTION_GAP)}>
-      <ConfigPanel client:visible>
-        <div class="flex flex-col gap-3.5">
-          <h2 class={H2}>Configure it once, then stop thinking about it</h2>
-          <p class="m-0 text-16 leading-[1.6] text-muted text-pretty">
-            One TOML file. Clients speak plain JSON over a WebSocket, with no SDK to install.
-          </p>
-        </div>
-      </ConfigPanel>
-    </section>
-
-    {/* 7 · The "no" band */}
-    <section class={cn(WRAP, SECTION_GAP)}>
-      <div data-reveal="0" class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-px border-y border-hairline bg-hairline">
-        {NOS.map((no) => (
-          <div class="flex flex-col gap-1.5 bg-page py-6 pr-6">
-            <span class="text-[18px] font-semibold tracking-[-0.02em] text-strong">{no.t}</span>
-            <span class="text-14 leading-normal text-muted">{no.d}</span>
+        {/* Product window: an incident */}
+        <div data-reveal="200" class="relative mt-16">
+          <div aria-hidden="true" class="pointer-events-none absolute inset-x-[8%] top-[24%] h-[70%]">
+            <div class="absolute left-0 top-0 h-full w-[45%] rounded-pill bg-accent opacity-25 blur-[96px]"></div>
+            <div class="absolute right-0 top-[12%] h-[90%] w-[40%] rounded-pill bg-accent2 opacity-20 blur-[96px]"></div>
           </div>
-        ))}
-      </div>
-    </section>
-
-    {/* 8 · Feature index */}
-    <section class={cn(WRAP, SECTION_GAP, 'grid grid-cols-1 items-start gap-x-[clamp(32px,5vw,72px)] gap-y-10 min-[900px]:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]')}>
-      <div class="flex flex-col gap-3.5 min-[900px]:sticky min-[900px]:top-24">
-        <h2 class={H2}>Everything in the box</h2>
-        <p class="m-0 max-w-[340px] text-[15px] leading-[1.6] text-muted text-pretty">
-          Solid pills ship in {VERSION}. Dashed pills are on the roadmap.
-        </p>
-        <div class="flex gap-4 text-12 text-muted">
-          <span class="flex items-center gap-1.5"><span class="size-1.5 rounded-pill bg-ok-solid"></span>Works today</span>
-          <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-[3px] border border-dashed border-faint"></span>Planned</span>
+          <IncidentWindow client:visible />
+          <p class="m-0 mt-3 text-center text-12 text-faint">
+            Dashboard preview with demo data. The built in dashboard is on the roadmap.
+          </p>
         </div>
-      </div>
-      <div class="flex flex-col border-t border-hairline">
-        {FEATURE_GROUPS.map((g) => (
-          <div data-reveal="0" class="grid grid-cols-1 gap-x-6 gap-y-3 border-b border-hairline py-6 min-[640px]:grid-cols-[160px_minmax(0,1fr)]">
-            <span class="pt-[5px] text-[15px] font-semibold text-strong">{g.name}</span>
-            <ul class="m-0 flex list-none flex-wrap gap-2 p-0">
-              {g.items.map(([label, ok]) => (
-                <li
+      </section>
+
+      {/* Stack strip */}
+      <section
+        aria-label="Built with"
+        class={cn(SECTION, 'flex flex-wrap items-center justify-center gap-8 border-y border-hairline p-6')}
+      >
+        <span class="text-14 text-faint">Built on open standards</span>
+        {STACK.map((s) => <span class="text-16 font-semibold tracking-[-0.01em] text-muted">{s}</span>)}
+      </section>
+
+      {/* Highlighter statement */}
+      <section id="statement" aria-label="What Lumyx does" class={cn(SECTION, PAD)}>
+        <p
+          class="m-0 max-w-[880px] text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] min-[640px]:text-[30px] min-[1100px]:text-[36px]"
+        >
+          {
+            WORDS.map((w, i) => (
+              <>
+                <span
+                  data-word={i}
                   class={cn(
-                    'inline-flex h-[30px] items-center gap-[7px] rounded-[6px] border border-stroke px-3 text-13',
-                    ok ? 'border-solid bg-card text-strong' : 'border-dashed bg-transparent text-muted',
+                    'rounded-xs text-stroke transition-[color,background-color] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] data-lit:text-strong',
+                    w.key && 'px-1 data-lit:bg-accent-tint data-lit:text-accent-text',
                   )}
                 >
-                  {ok && <span class="size-1.5 rounded-pill bg-ok-solid"></span>}
-                  {label}
-                  <span class="sr-only">{ok ? '(works today)' : '(planned)'}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </section>
+                  {w.w}
+                </span>{' '}
+              </>
+            ))
+          }
+        </p>
+      </section>
 
-    {/* 9 · Honest status */}
-    <section id="status" class={cn(WRAP, SECTION_GAP, 'flex scroll-mt-20 flex-col gap-8')}>
-      <div data-reveal="0" class="flex flex-wrap items-end justify-between gap-x-12 gap-y-4">
-        <div class="flex max-w-[620px] flex-col gap-3.5">
-          <span class={EYEBROW}>Project status · alpha {VERSION}</span>
-          <h2 class={H2}>What works, and what doesn't yet</h2>
-          <p class="m-0 text-16 leading-[1.6] text-muted text-pretty">
-            No customers yet, no published benchmark. Here is the line between the two, kept in sync with the README.
+      {/* Detect / explain / recover */}
+      <section id="product" class={cn(SECTION, 'grid scroll-mt-16 border-t border-hairline min-[960px]:grid-cols-3')}>
+        {
+          PILLARS.map((p, i) => (
+            <article
+              data-reveal={i * 80}
+              class={cn(CELL, 'flex flex-col gap-6 px-6 pb-12 pt-8 transition-colors duration-700 hover:bg-sunken')}
+            >
+              <div
+                aria-hidden="true"
+                class="flex h-[200px] flex-col justify-center gap-2 overflow-hidden rounded-lg border border-hairline bg-sunken p-4"
+              >
+                {p.ui.map((u) => (
+                  <div
+                    class={cn(
+                      'flex items-center gap-2 rounded-sm border bg-card px-3 py-2 text-12 shadow-sm',
+                      u.flagged ? 'border-danger-solid/40' : 'border-stroke',
+                    )}
+                  >
+                    <span class={cn('size-2 rounded-pill', DOT[u.tone])} />
+                    <span class="font-semibold text-strong">{u.t}</span>
+                    <span class="flex-1" />
+                    <span class={cn('sl-num', u.tone === 'ok' && !u.flagged ? 'text-strong' : INK[u.tone])}>{u.v}</span>
+                  </div>
+                ))}
+              </div>
+              <div class="flex flex-col gap-2">
+                <h3 class="m-0 flex items-center gap-2 text-20 leading-7 tracking-[-0.02em] text-strong">
+                  {p.title}
+                  {p.planned && (
+                    <span class="rounded-pill border border-dashed border-stroke px-2 py-0.5 text-12 font-medium tracking-normal text-faint">
+                      Planned
+                    </span>
+                  )}
+                </h3>
+                <p class="m-0 text-16 leading-6 text-muted">{p.body}</p>
+              </div>
+            </article>
+          ))
+        }
+      </section>
+
+      {/* Tabbed product showcase */}
+      <section class={cn(SECTION, PAD, 'border-t border-hairline')}>
+        <div data-reveal="0" class="mb-12 flex max-w-[680px] flex-col gap-4">
+          <span class="text-14 font-semibold text-accent-text">Inside the forwarder</span>
+          <h2 class={H2}>Every room, every peer,<br />every packet path</h2>
+        </div>
+        <div data-reveal="80">
+          <ProductTabs client:visible />
+          <p class="m-0 mt-3 text-12 text-faint">Demo data. The config file is a draft shape: today the SFU reads environment variables.</p>
+        </div>
+      </section>
+
+      {/* Checklist grid */}
+      <section id="status" class={cn(SECTION, 'scroll-mt-16 border-t border-hairline')}>
+        <div
+          data-reveal="0"
+          class="flex flex-col items-center gap-4 px-4 pb-12 pt-16 text-center min-[640px]:px-6 min-[640px]:pb-16 min-[640px]:pt-24"
+        >
+          <h2 class={H2}>What works today.<br />What ships next.</h2>
+          <p class={cn(LEAD, 'max-w-[680px]')}>
+            Alpha {VERSION}. No customers yet and no published benchmark. The list below mirrors the README.
           </p>
         </div>
-        <a href={`${REPO}#project-status`} class="text-14 font-medium">README · Project status</a>
-      </div>
-      <div data-reveal="80" class="grid grid-cols-1 overflow-hidden rounded-xs min-[1000px]:grid-cols-2 border border-stroke bg-card">
-        {[
-          { title: 'Works today', rows: WORKS, ok: true },
-          { title: 'Planned', rows: PLANNED, ok: false },
-        ].map((col) => (
-          <div class={cn('flex flex-col', !col.ok && 'border-t border-hairline min-[1000px]:border-l min-[1000px]:border-t-0')}>
-            <div class="flex h-11 items-center gap-2 border-b border-hairline px-5">
-              {col.ok ? (
-                <span class="size-[7px] rounded-pill bg-ok-solid"></span>
-              ) : (
-                <span class="size-[9px] rounded-pill border border-dashed border-faint"></span>
-              )}
-              <span class="text-14 font-semibold text-strong">{col.title}</span>
-            </div>
-            {col.rows.map((w) => (
-              <div class="flex justify-between gap-4 border-b border-subtle px-5 py-3 text-14">
-                <span class={col.ok ? 'text-strong' : 'text-body'}>{w.t}</span>
-                <span class="sl-num text-right text-12 text-faint">{w.d}</span>
+        <div class="grid border-t border-hairline min-[960px]:grid-cols-3">
+          {
+            CHECKS.map((c, i) => (
+              <div data-reveal={i * 80} class={cn(CELL, 'flex flex-col gap-3 px-6 py-8')}>
+                <h3 class="m-0 mb-2 text-16 text-strong">{c.t}</h3>
+                <ul class="m-0 flex list-none flex-col gap-3 p-0">
+                  {c.items.map(([t, ok]) => (
+                    <li class={cn('flex items-center gap-3 text-14', ok ? 'text-strong' : 'text-faint')}>
+                      <span
+                        class={cn(
+                          'flex size-5 flex-none items-center justify-center rounded-pill',
+                          ok ? 'bg-strong' : 'border border-dashed border-stroke',
+                        )}
+                      >
+                        {ok && (
+                          <svg width="12" height="12" viewBox="0 0 256 256" aria-hidden="true" class="fill-none stroke-page">
+                            <path d="M40 136l56 56 120-128" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        )}
+                      </span>
+                      {t}
+                      <span class="sr-only">{ok ? '(works today)' : '(planned)'}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </section>
-
-    {/* 10 · Final CTA */}
-    <section class={cn(WRAP, 'flex flex-col gap-8 py-[clamp(88px,10vw,144px)]')}>
-      <div data-reveal="0" class="flex flex-wrap items-end justify-between gap-x-12 gap-y-5">
-        <h2 class="m-0 max-w-[720px] text-[clamp(34px,4.4vw,56px)] font-semibold leading-[1.02] tracking-[-0.035em] text-strong text-balance">
-          Find out why your last call was bad
-        </h2>
-        <div class="flex flex-wrap gap-3">
-          <a href={QUICKSTART} data-slot="button" class={cn(buttonVariants({ variant: 'primary', size: 'lg' }), BTN)}>
-            Read the Quickstart
-          </a>
-          <a href={REPO} data-slot="button" class={cn(buttonVariants({ variant: 'secondary', size: 'lg' }), BTN)}>
-            View on GitHub
-          </a>
+            ))
+          }
         </div>
-      </div>
-      <div data-reveal="80">
-        <StartTerminal client:visible />
-      </div>
-    </section>
+      </section>
 
-    {/* 11 · Footer */}
-    <footer class="border-t border-hairline">
-      <div class={cn(WRAP, 'flex flex-col gap-12 pb-10 pt-14')}>
-        <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-8">
-          <div class="flex flex-col gap-3">
-            <span class="flex items-center gap-2.5 text-strong">
-              <LumyxMark size={16} className="text-accent" />
-              <span class="text-16 font-semibold tracking-[-0.02em]">Lumyx</span>
-            </span>
-            <span class="max-w-[240px] text-13 leading-normal text-muted">The WebRTC SFU that tells you why the call was bad.</span>
+      {/* Dark band: packets */}
+      <section class="dark relative z-[3] border-y border-hairline bg-page text-body">
+        <div class={cn(SECTION, PAD, 'flex flex-col gap-12')}>
+          <div data-reveal="0" class="flex max-w-[680px] flex-col gap-4">
+            <span class="text-14 font-semibold text-accent-text">Rust in the media path</span>
+            <h2 class="m-0 text-[30px] leading-none tracking-[-0.04em] text-strong text-balance min-[640px]:text-[48px]">
+              Forwarding that never<br />stops to collect garbage
+            </h2>
+            <p class={LEAD}>
+              Every bar below is a packet. Lumyx forwards them in Rust end to end and marks the ones that never arrived.
+            </p>
           </div>
-          {FOOTER_COLS.map((fc) => (
-            <div class="flex flex-col gap-2.5">
-              <span class="sl-label">{fc.t}</span>
+          <div data-reveal="80" aria-hidden="true" class="h-24 overflow-hidden rounded-lg border border-stroke py-4">
+            <div class="flex h-16 w-max gap-1 animate-[sl-marquee_24s_linear_infinite] motion-reduce:animate-none">
+              {
+                [...PACKETS, ...PACKETS].map((p) => (
+                  <span
+                    class={cn('w-0.5 self-end rounded-[2px]', p.lost ? 'bg-danger-solid' : 'bg-stroke')}
+                    style={`height:${p.h}px`}
+                  />
+                ))
+              }
+            </div>
+          </div>
+          <dl class="m-0 grid grid-cols-2 overflow-hidden rounded-lg border border-stroke min-[640px]:grid-cols-4">
+            {
+              FACTS.map((f, i) => (
+                <div
+                  class={cn(
+                    'flex flex-col-reverse gap-1 border-stroke p-6',
+                    i % 2 === 0 && 'border-r',
+                    i < 2 && 'max-[639px]:border-b',
+                    i === 1 && 'min-[640px]:border-r',
+                  )}
+                >
+                  <dt class="text-14 text-muted">{f.k}</dt>
+                  <dd class="m-0 text-[30px] font-semibold leading-9 tracking-[-0.03em] text-strong">{f.v}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </section>
+
+      {/* Quickstart */}
+      <section
+        id="start"
+        class={cn(SECTION, PAD, 'grid scroll-mt-16 items-center gap-12 min-[960px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]')}
+      >
+        <div data-reveal="0" class="flex flex-col gap-6">
+          <h2 class={H2}>Running in<br />one command</h2>
+          <p class={cn(LEAD, 'max-w-[440px]')}>
+            Signaling and forwarding in one process. Clients speak plain JSON over a WebSocket, with no SDK to install.
+          </p>
+          <ol class="m-0 flex list-none flex-col gap-3 p-0">
+            {
+              QS_STEPS.map((t, i) => (
+                <li class="flex items-center gap-3 text-16 text-strong">
+                  <span class="flex size-6 items-center justify-center rounded-pill bg-inset text-12 font-semibold">{i + 1}</span>
+                  {t}
+                </li>
+              ))
+            }
+          </ol>
+          <a href={QUICKSTART} class="self-start text-14 font-medium">Full quickstart in the docs →</a>
+        </div>
+        <div data-reveal="80">
+          <StartTerminal client:visible />
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section
+        id="faq"
+        class={cn(SECTION, PAD, 'grid scroll-mt-16 gap-12 border-t border-hairline min-[960px]:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]')}
+      >
+        <div data-reveal="0" class="flex flex-col gap-4">
+          <h2 class={H2}>Questions</h2>
+          <p class="m-0 text-16 leading-6 text-muted">
+            Missing one? Ask in <a href={`${REPO}/discussions`}>GitHub Discussions</a>.
+          </p>
+        </div>
+        <div data-reveal="80">
+          {
+            FAQ.map((f, i) => (
+              <details name="faq" open={i === 0} class="group border-b border-hairline">
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-6 text-[18px] font-semibold leading-7 text-strong [&::-webkit-details-marker]:hidden">
+                  {f.q}
+                  <span class="flex size-8 flex-none items-center justify-center rounded-pill border border-stroke transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-open:rotate-45">
+                    <svg width="14" height="14" viewBox="0 0 256 256" aria-hidden="true" class="fill-none stroke-strong">
+                      <path d="M40 128h176M128 40v176" stroke-width="20" stroke-linecap="round" />
+                    </svg>
+                  </span>
+                </summary>
+                <p class="m-0 pb-6 pr-12 text-16 leading-6 text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section
+        class={cn(
+          SECTION,
+          'relative flex flex-col items-center gap-6 overflow-hidden border-t border-hairline px-4 py-24 text-center min-[640px]:px-6 min-[640px]:py-32',
+        )}
+      >
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-[20%] top-[40%] h-[60%]">
+          <div class="absolute left-0 top-0 h-full w-[55%] rounded-pill bg-accent opacity-20 blur-[96px]"></div>
+          <div class="absolute right-0 top-0 h-full w-[55%] rounded-pill bg-accent2 opacity-15 blur-[96px]"></div>
+        </div>
+        <h2 data-reveal="0" class={cn(H1, 'relative max-w-[680px]')}>Live video that<br />tells you why it broke</h2>
+        <p data-reveal="80" class={cn(LEAD, 'relative max-w-[680px]')}>
+          Free and MIT licensed. Runs on your server, no account needed.
+        </p>
+        <div data-reveal="160" class="relative flex flex-wrap justify-center gap-3">
+          <a href={QUICKSTART} class={cn(BTN_DARK, BTN_MD)}>Read the quickstart</a>
+          <a href={REPO} class={cn(BTN_LIGHT, BTN_MD)}>Star on GitHub</a>
+        </div>
+      </section>
+    </main>
+
+    {/* Footer */}
+    <footer class={cn(SECTION, 'relative z-[2] flex flex-col gap-12 border-t border-hairline px-6 py-12')}>
+      <div class="grid grid-cols-2 gap-8 min-[960px]:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+        <div class="col-span-2 flex flex-col gap-2 min-[960px]:col-span-1">
+          <span class="flex items-center gap-2 text-16 font-semibold text-strong">
+            <LumyxMark size={16} className="text-accent" />
+            Lumyx
+          </span>
+          <span class="max-w-[240px] text-14 leading-5 text-muted">The WebRTC SFU that tells you why the call was bad.</span>
+        </div>
+        {
+          FOOTER_COLS.map((fc) => (
+            <div class="flex flex-col gap-3">
+              <span class="text-14 font-semibold text-strong">{fc.t}</span>
               {fc.links.map((l) => (
-                <a href={l.href} class="text-14 text-muted no-underline hover:text-strong hover:no-underline">{l.label}</a>
+                <a href={l.href} class={cn(LINK, 'text-14')}>{l.label}</a>
               ))}
             </div>
-          ))}
-        </div>
-        <div class="flex flex-wrap justify-between gap-3 border-t border-hairline pt-5 text-13 text-faint">
-          <span>MIT licensed · © 2026 Mathieu Chambaud</span>
-          <span class="sl-num">lumyx.dev · {VERSION} alpha</span>
-        </div>
+          ))
+        }
+      </div>
+      <div class="flex flex-wrap justify-between gap-3 text-12 text-faint">
+        <span>MIT licensed · © 2026 Mathieu Chambaud</span>
+        <span class="sl-num">lumyx.dev · {VERSION} alpha</span>
       </div>
     </footer>
   </div>
 </Base>
 
 <script>
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ease = 'cubic-bezier(0.32,0.72,0,1)';
+
   // Scroll reveal. Fail-safe: an element is only hidden once the observer has reported it as
   // below the fold, so nothing stays invisible if the observer never fires.
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!reduced && 'IntersectionObserver' in window) {
     const seen = new WeakSet<Element>();
-    const show = (el: HTMLElement) => {
-      el.style.opacity = '';
-      el.style.transform = '';
-    };
     const io = new IntersectionObserver(
       (entries) =>
         entries.forEach((e) => {
@@ -330,21 +437,46 @@ const QUICKSTART = `${DOCS_URL}/quickstart`;
             seen.add(el);
             if (!e.isIntersecting && e.boundingClientRect.top > 0) {
               el.style.opacity = '0';
-              el.style.transform = 'translateY(16px)';
+              el.style.transform = 'translateY(64px)';
+              el.style.filter = 'blur(12px)';
               requestAnimationFrame(() => {
                 const d = el.dataset.reveal ?? '0';
-                el.style.transition = `opacity 560ms ease-out ${d}ms, transform 560ms cubic-bezier(.2,.7,.2,1) ${d}ms`;
+                el.style.transition = ['opacity', 'transform', 'filter'].map((p) => `${p} 900ms ${ease} ${d}ms`).join(', ');
               });
               return;
             }
           }
           if (e.isIntersecting || e.boundingClientRect.top <= 0) {
-            show(el);
+            el.style.opacity = '';
+            el.style.transform = '';
+            el.style.filter = '';
             io.unobserve(el);
           }
         }),
-      { threshold: 0 },
+      { threshold: 0.12 },
     );
     document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => io.observe(el));
+  }
+
+  // Statement: light every word up to the last one that has crossed 60% of the viewport.
+  const words = [...document.querySelectorAll<HTMLElement>('#statement [data-word]')];
+  const light = (upTo: number) => words.forEach((w, i) => w.toggleAttribute('data-lit', i <= upTo));
+  if (reduced || !('IntersectionObserver' in window)) {
+    light(words.length);
+  } else {
+    let lit = -1;
+    const wo = new IntersectionObserver(
+      (entries) => {
+        let max = lit;
+        entries.forEach((e) => {
+          const i = Number((e.target as HTMLElement).dataset.word);
+          if (e.isIntersecting || e.boundingClientRect.top < 0) max = Math.max(max, i);
+          else if (e.boundingClientRect.top > 0 && i <= max) max = Math.min(max, i - 1);
+        });
+        if (max !== lit) light((lit = max));
+      },
+      { rootMargin: '0px 0px -40% 0px' },
+    );
+    words.forEach((w) => wo.observe(w));
   }
 </script>

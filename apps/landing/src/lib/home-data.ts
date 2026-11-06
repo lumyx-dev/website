@@ -1,193 +1,157 @@
 /**
- * Content of the home page (design: "Lumyx Home", Claude Design).
+ * Content of the home page (design: "Lumyx Home v3", Claude Design).
  * Every "works today" claim mirrors the Project status table of the sfu-core README —
- * keep the two in step.
+ * keep the two in step. Room, peer and incident figures are demo data and are labelled as such.
  */
 import { DOCS_URL, REPO } from "./site-data";
 
 export const DOCKER_RUN = "docker run -p 3000:3000 ghcr.io/lumyx-dev/sfu-core:latest";
+export const QUICKSTART = `${DOCS_URL}/quickstart`;
 
 export const NAV = [
+  { href: "/#top", label: "Overview" },
   { href: "/#product", label: "Product" },
-  { href: "/#topology", label: "Observability" },
+  { href: "/#status", label: "Status" },
+  { href: "/#start", label: "Quickstart" },
+  { href: "/#faq", label: "FAQ" },
   { href: DOCS_URL, label: "Docs" },
-  { href: REPO, label: "GitHub" },
 ];
 
-export const METRIC_NAMES = [
-  "packet_loss_ratio", "rtt_ms", "jitter_ms", "nack_ratio", "freeze_ratio", "bitrate_kbps",
-  "forwarded_bytes_total", "ice_candidate_type", "jitter_buffer_delay_ms", "pli_count",
-  "srtp_decrypt_errors", "rooms_active",
+export const STACK = ["Rust", "WebRTC", "RTCP", "WebSocket", "Docker", "MIT"];
+
+/** The scroll-lit statement. `true` marks a highlighted phrase; plain runs are split per word. */
+export const STATEMENT: [string, boolean][] = [
+  ["Lumyx forwards", false],
+  ["every packet,", true],
+  ["reads", false],
+  ["every RTCP report,", true],
+  ["and tells", false],
+  ["you which peer broke", true],
+  ["and why. No exporter, no Grafana, no guessing.", false],
 ];
 
-export type Pain = {
-  n: string;
+export type Tone = "ok" | "warn" | "bad" | "accent" | "idle";
+
+export type Pillar = {
   title: string;
   body: string;
-  src: string;
-  kv: { k: string; v: string; faint?: boolean }[];
+  planned: boolean;
+  ui: { t: string; v: string; tone: Tone; flagged?: boolean }[];
 };
 
-export const PAINS: Pain[] = [
+/** Detect and explain need the RTCP metrics collector, which the README lists as planned. */
+export const PILLARS: Pillar[] = [
   {
-    n: "01",
-    title: "Self-hosting shouldn’t mean three services and a Redis.",
-    body: "Signaling, forwarding and the dashboard run in one process. One command starts it; there is nothing else to deploy or keep in sync.",
-    src: "docker run",
-    kv: [
-      { k: "processes", v: "1" },
-      { k: "external dependencies", v: "none" },
-      { k: "config to start", v: "0 lines" },
-      { k: "image", v: "ghcr.io/lumyx-dev/sfu-core" },
-      { k: "license", v: "MIT" },
+    title: "Detect",
+    body: "Freezes, loss spikes and TURN fallbacks show up the moment the forwarder sees them, before a user writes in.",
+    planned: true,
+    ui: [
+      { t: "Amara", v: "frozen", tone: "bad", flagged: true },
+      { t: "Kenji", v: "live", tone: "ok" },
+      { t: "Noor", v: "live", tone: "ok" },
     ],
   },
   {
-    n: "02",
-    title: "Stop bolting Grafana onto your SFU.",
-    body: "The forwarder already sees every RTCP report. Lumyx keeps the six numbers that explain a bad call, per peer and per room, and pages Slack or PagerDuty when one crosses its threshold.",
-    src: "per peer · per room · 500 ms",
-    kv: [
-      { k: "jitter_ms", v: "> 30" },
-      { k: "packet_loss_ratio", v: "> 0.02" },
-      { k: "rtt_ms", v: "> 200" },
-      { k: "nack_ratio", v: "> 0.05" },
-      { k: "freeze_ratio", v: "> 0.01" },
-      { k: "bitrate_kbps", v: "< 100" },
+    title: "Explain",
+    body: "Six numbers per peer, compared to your thresholds, so the cause is written next to the symptom.",
+    planned: true,
+    ui: [
+      { t: "packet loss", v: "7.9% / 2%", tone: "bad" },
+      { t: "jitter", v: "44 ms / 30", tone: "bad" },
+      { t: "round trip", v: "212 / 250", tone: "ok" },
     ],
   },
   {
-    n: "03",
-    title: "Written in Rust, not Go with CGO.",
-    body: "The hot path is Rust end to end. No garbage collector pausing forwarding mid-frame, no FFI boundary to cross for SRTP.",
-    src: "media path",
-    kv: [
-      { k: "media path", v: "Rust" },
-      { k: "GC pauses", v: "none" },
-      { k: "CGO / FFI boundary", v: "none" },
-      { k: "measured throughput", v: "benchmark pending", faint: true },
+    title: "Recover",
+    body: "Request a keyframe, drop a simulcast layer or fall back to audio, and log what it did.",
+    planned: true,
+    ui: [
+      { t: "PLI sent", v: "14:06:43", tone: "accent" },
+      { t: "Layer 720p → 360p", v: "planned", tone: "idle" },
+      { t: "Audio only", v: "planned", tone: "idle" },
     ],
   },
 ];
 
-export const TOPO_LEGEND = [
-  { kind: "line", label: "Direct path" },
-  { kind: "dashed", label: "TURN relay" },
-  { kind: "warn", label: "Approaching" },
-  { kind: "bad", label: "Breached" },
+export const TABS = [
+  { label: "Rooms", desc: "Every live room and its worst peer" },
+  { label: "Peers", desc: "Six numbers per participant" },
+  { label: "Topology", desc: "The path each packet takes" },
+  { label: "Config", desc: "Thresholds in one TOML file" },
 ] as const;
 
-export type CodeLang = "toml" | "ts" | "prom" | "json";
-
-export type Snippet = {
-  label: string;
-  lang: CodeLang;
-  /** 1-based, inclusive line range banded with the accent tint. */
-  hl: [number, number];
-  note: string;
-  lines: string[];
-};
-
-export const SNIPPETS: Record<"toml" | "ts" | "prom" | "json", Snippet> = {
-  toml: {
-    label: "lumyx.toml",
-    lang: "toml",
-    hl: [7, 12],
-    note: "Draft config shape — today the SFU reads environment variables. Thresholds, alert destinations and remediation are on the roadmap.",
-    lines: [
-      "# lumyx.toml — read at startup",
-      "[server]",
-      'listen = "0.0.0.0:3000"',
-      'region = "eu-west-3"',
-      "",
-      "[thresholds]",
-      "packet_loss_ratio = 0.02",
-      "rtt_ms = 200",
-      "jitter_ms = 30",
-      "nack_ratio = 0.05",
-      "freeze_ratio = 0.01",
-      'debounce = "30s"',
-      "",
-      "[alerts.slack]",
-      'webhook = "env:SLACK_WEBHOOK_URL"',
-      'min_severity = "warning"',
-      "",
-      "[alerts.pagerduty]",
-      'routing_key = "env:PD_ROUTING_KEY"',
-      'min_severity = "critical"',
-      "",
-      "[remediation]",
-      "audio_only_fallback = true",
-      "simulcast_drop_layer = true",
-    ],
-  },
-  ts: {
-    label: "signaling.ts",
-    lang: "ts",
-    hl: [5, 5],
-    note: "WebSocket signaling works today. Plain JSON envelopes and RTCPeerConnection — no client SDK to install.",
-    lines: [
-      "// No SDK: plain JSON over a WebSocket.",
-      'const ws = new WebSocket("wss://sfu.example.com/ws")',
-      "const pc = new RTCPeerConnection()",
-      "",
-      'ws.send(JSON.stringify({ type: "join", room_id: "webinar-us", peer_id: "a3f91c02" }))',
-      "",
-      "const offer = await pc.createOffer()",
-      "await pc.setLocalDescription(offer)",
-      'ws.send(JSON.stringify({ type: "sfu_offer", sdp: offer.sdp }))',
-    ],
-  },
-  prom: {
-    label: "GET /metrics",
-    lang: "prom",
-    hl: [3, 5],
-    note: "Prometheus exposition format. Planned — the dashboard reads the same series.",
-    lines: [
-      "# HELP lumyx_peer_rtt_ms Round-trip time per peer",
-      "# TYPE lumyx_peer_rtt_ms gauge",
-      'lumyx_peer_rtt_ms{room="webinar-us",peer="ff104b2c"} 284',
-      'lumyx_peer_packet_loss_ratio{room="webinar-us",peer="ff104b2c"} 0.079',
-      'lumyx_peer_jitter_ms{room="webinar-us",peer="ff104b2c"} 42',
-      'lumyx_room_forwarded_bytes_total{room="webinar-us"} 1384920113',
-    ],
-  },
-  json: {
-    label: "webhook.json",
-    lang: "json",
-    hl: [5, 8],
-    note: "Payload POSTed to your webhook when a threshold is crossed. Draft shape.",
-    lines: [
-      "{",
-      '  "event": "threshold.breached",',
-      '  "room": "webinar-us",',
-      '  "peer": "ff104b2c",',
-      '  "metric": "packet_loss_ratio",',
-      '  "value": 0.079,',
-      '  "threshold": 0.02,',
-      '  "duration_s": 192,',
-      '  "remediation": {',
-      '    "action": "audio_only_fallback",',
-      '    "applied_at": "14:06:41Z"',
-      "  }",
-      "}",
-    ],
-  },
-};
-
-export type SnippetKey = keyof typeof SNIPPETS;
-
-export const STEPS: { n: string; title: string; body: string; tab: SnippetKey; hl: [number, number]; planned?: boolean }[] = [
-  { n: "01", title: "Set thresholds", body: "Six numbers per environment. Crossing one for longer than the debounce opens an alert.", tab: "toml", hl: [6, 12] },
-  { n: "02", title: "Pick destinations", body: "Slack for warnings, PagerDuty for critical, a webhook for anything else.", tab: "toml", hl: [14, 20], planned: true },
-  { n: "03", title: "Let it remediate", body: "Force audio-only for a degrading peer, or drop its top simulcast layer. The alert says it did.", tab: "json", hl: [9, 12], planned: true },
+export const ROOMS: { n: string; p: number; l: string; r: string; s: "Healthy" | "Watch" | "Degraded" }[] = [
+  { n: "webinar-us", p: 6, l: "7.9%", r: "284 ms", s: "Degraded" },
+  { n: "standup-eu", p: 4, l: "0.4%", r: "61 ms", s: "Healthy" },
+  { n: "support-call-1187", p: 2, l: "0.1%", r: "38 ms", s: "Healthy" },
+  { n: "demo-room", p: 9, l: "1.6%", r: "173 ms", s: "Watch" },
+  { n: "design-review", p: 3, l: "0.3%", r: "52 ms", s: "Healthy" },
+  { n: "all-hands", p: 14, l: "0.7%", r: "88 ms", s: "Healthy" },
 ];
 
-export type StartLine = { p: string; v: string; dim?: boolean; href?: string };
+export const PEER_CARDS: { n: string; l: string; r: string; j: string; b: string; tone: Tone }[] = [
+  { n: "Amara", l: "7.9%", r: "284 ms", j: "44 ms", b: "0.2 Mbps", tone: "bad" },
+  { n: "Léo", l: "0.6%", r: "71 ms", j: "9 ms", b: "1.6 Mbps", tone: "ok" },
+  { n: "Noor", l: "0.3%", r: "52 ms", j: "6 ms", b: "2.1 Mbps", tone: "ok" },
+  { n: "Kenji", l: "1.4%", r: "118 ms", j: "41 ms", b: "0.9 Mbps", tone: "warn" },
+  { n: "Inès", l: "0.1%", r: "44 ms", j: "5 ms", b: "2.6 Mbps", tone: "ok" },
+  { n: "Ravi", l: "0.2%", r: "38 ms", j: "4 ms", b: "2.4 Mbps", tone: "ok" },
+];
+
+export const TOPO: { id: string; x: number; y: number; w: number; relay?: boolean; tone: Tone; labelBelow: boolean }[] = [
+  { id: "ff104b2c", x: 110, y: 80, w: 2, relay: true, tone: "bad", labelBelow: true },
+  { id: "a3f91c02", x: 120, y: 330, w: 6, tone: "ok", labelBelow: false },
+  { id: "c27ad930", x: 690, y: 80, w: 4, tone: "ok", labelBelow: true },
+  { id: "7e01d4aa", x: 720, y: 240, w: 5, tone: "ok", labelBelow: true },
+  { id: "5b9c3e10", x: 610, y: 370, w: 3, tone: "warn", labelBelow: false },
+  { id: "91da0f67", x: 330, y: 380, w: 6, tone: "ok", labelBelow: false },
+];
+
+/** Draft config shape — today the SFU reads environment variables. */
+export const TOML = [
+  "# lumyx.toml",
+  "[server]",
+  'listen = "0.0.0.0:3000"',
+  'region = "eu-west-3"',
+  "",
+  "[thresholds]",
+  "packet_loss_ratio = 0.02",
+  "rtt_ms = 200",
+  "jitter_ms = 30",
+  "freeze_ratio = 0.01",
+  'debounce = "30s"',
+];
+
+/** `true` = ships in the current alpha, `false` = planned. Mirrors the README. */
+export const CHECKS: { t: string; items: [string, boolean][] }[] = [
+  {
+    t: "Media",
+    items: [["Selective forwarding", true], ["ICE, DTLS, SRTP", true], ["RTP forwarding", true], ["Simulcast layers", false], ["TURN fallback", false]],
+  },
+  {
+    t: "Observability",
+    items: [["RTCP metrics collector", false], ["Six metrics per peer", false], ["Room topology", false], ["Prometheus endpoint", false], ["Session replay", false]],
+  },
+  {
+    t: "Operations",
+    items: [["Single process", true], ["Docker image", true], ["WebSocket signaling", true], ["Room manager", true], ["Alerts to Slack and PagerDuty", false]],
+  },
+];
+
+export const FACTS = [
+  { v: "Rust", k: "end to end in the media path" },
+  { v: "0", k: "garbage collector pauses" },
+  { v: "1", k: "process to deploy" },
+  { v: "MIT", k: "licensed, no account needed" },
+];
+
+export const QS_STEPS = ["Run the container", "Open a WebSocket and join a room", "Forward media between peers"];
+
+export type StartLine = { p: string; v: string; dim?: boolean };
 
 export const START: Record<"docker" | "cargo", { label: string; lines: StartLine[] }> = {
   docker: {
-    label: "docker run",
+    label: "docker",
     lines: [
       { p: "$", v: DOCKER_RUN },
       { p: "#", v: "then open http://localhost:3000", dim: true },
@@ -206,37 +170,32 @@ export const START: Record<"docker" | "cargo", { label: string; lines: StartLine
 
 export type StartKey = keyof typeof START;
 
-export const NOS = [
-  { t: "No GC pauses", d: "Rust in the media path." },
-  { t: "No exporter to write", d: "Metrics come from the forwarder." },
-  { t: "No Redis", d: "Room state lives in the process." },
-  { t: "No SDK to install", d: "Plain JSON over a WebSocket." },
-];
-
-/** `true` = ships in the current alpha, `false` = planned. */
-export const FEATURE_GROUPS: { name: string; items: [string, boolean][] }[] = [
-  { name: "Media", items: [["Selective forwarding", true], ["ICE", true], ["DTLS", true], ["SRTP", true], ["RTP forwarding", true], ["Simulcast layers", false], ["TURN fallback", false]] },
-  { name: "Observability", items: [["RTCP metrics collector", false], ["Six metrics per peer", false], ["Per-room rollups", false], ["Room topology", false], ["Prometheus /metrics", false], ["Session replay", false]] },
-  { name: "Alerting", items: [["Thresholds per environment", false], ["Debounce", false], ["Slack", false], ["PagerDuty", false], ["Webhooks", false], ["Audio-only fallback", false]] },
-  { name: "Operations", items: [["Single process", true], ["Docker image", true], ["WebSocket signaling", true], ["Room manager", true]] },
-];
-
-export const WORKS = [
-  { t: "ICE, DTLS, SRTP", d: "end to end" },
-  { t: "RTP forwarding", d: "selective" },
-  { t: "Room manager", d: "join · leave · tracks" },
-  { t: "WebSocket signaling", d: "offer · answer · ice" },
-  { t: "Test suite", d: "147 tests" },
-  { t: "Docker image", d: "sfu-core:latest" },
-];
-
-export const PLANNED = [
-  { t: "Quality metrics", d: "jitter · loss · RTT · NACK" },
-  { t: "Thresholds and alerting", d: "Slack · PagerDuty · webhook" },
-  { t: "Automatic remediation", d: "audio-only · layer drop" },
-  { t: "Built-in dashboard", d: "topology · replay" },
-  { t: "Simulcast", d: "3 layers" },
-  { t: "Published benchmark", d: "pending" },
+export const FAQ: { q: string; a: string }[] = [
+  {
+    q: "Is Lumyx ready for production?",
+    a: "Not yet. It is an alpha: ICE, DTLS, SRTP and selective RTP forwarding work end to end. Quality metrics, alerting, the dashboard and simulcast are on the roadmap.",
+  },
+  {
+    q: "Do I need an SDK?",
+    a: "No. Clients speak plain JSON over a WebSocket and use the browser’s RTCPeerConnection. There is nothing to install.",
+  },
+  {
+    q: "How is it different from LiveKit?",
+    a: "Both forward media. Lumyx is built to keep per peer call quality inside the forwarder, so loss, jitter and round trip time come without an exporter and a Grafana stack.",
+  },
+  {
+    q: "Which metrics will it collect?",
+    a: "Packet loss ratio, jitter, round trip time, NACK ratio, freeze ratio and bitrate, per peer and per room, every 500 ms. The collector is planned.",
+  },
+  {
+    q: "Where does call data go?",
+    a: "Nowhere. Lumyx runs on your server and keeps room state in process. Nothing is sent to us.",
+  },
+  { q: "What does it cost?", a: "Nothing. The code is MIT licensed and runs on your own server." },
+  {
+    q: "How can I help?",
+    a: "Run it against your own calls and tell us what broke or what is missing. Issues and pull requests are welcome.",
+  },
 ];
 
 /** Every entry resolves to a page that exists. */
@@ -244,15 +203,15 @@ export const FOOTER_COLS = [
   {
     t: "Product",
     links: [
-      { label: "Observability", href: "/#product" },
-      { label: "Room topology", href: "/#topology" },
+      { label: "Overview", href: "/#top" },
       { label: "Project status", href: "/#status" },
+      { label: "FAQ", href: "/#faq" },
     ],
   },
   {
     t: "Developers",
     links: [
-      { label: "Quickstart", href: `${DOCS_URL}/quickstart` },
+      { label: "Quickstart", href: QUICKSTART },
       { label: "Docs", href: DOCS_URL },
       { label: "Metrics reference", href: `${DOCS_URL}/metrics-reference` },
       { label: "Configuration", href: `${DOCS_URL}/config` },
