@@ -28,6 +28,11 @@ export default defineConfig({
       titleDelimiter: '—',
       description:
         'Run, self-host and observe a Lumyx SFU: quickstart, deployment, the six media-path metrics and the REST API.',
+      favicon: '/favicon.svg',
+      head: [
+        { tag: 'link', attrs: { rel: 'icon', href: '/favicon.ico', sizes: '32x32' } },
+        { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } },
+      ],
       social: [{ icon: 'github', label: 'GitHub', href: REPO }],
       // Les squelettes portent le badge « Soon » de la maquette Docs v3.
       sidebar: sidebarGroups().map((group) => ({
