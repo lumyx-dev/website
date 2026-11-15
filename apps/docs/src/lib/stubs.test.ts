@@ -10,12 +10,12 @@ const DOCS_URL = process.env.PUBLIC_DOCS_URL ?? "https://docs.lumyx.dev";
 const CONTENT = fileURLToPath(new URL("../content/docs", import.meta.url));
 
 const STUBS = [
-  "alerting", "api", "config", "errors", "forwarding", "peers",
-  "prometheus", "replay", "rooms", "signaling", "topology",
+  "alerting", "api", "errors", "forwarding", "peers",
+  "prometheus", "replay", "rooms", "topology",
 ];
 
 describe("squelettes", () => {
-  test("les onze pages `stub: true` sont detectees", () => {
+  test("les neuf pages `stub: true` sont detectees", () => {
     expect(stubSlugs(CONTENT)).toEqual(STUBS);
   });
 
@@ -32,8 +32,8 @@ describe("sitemap", () => {
   );
   const kept = pages.filter(filter);
 
-  test("garde les quatre pages redigees, sans les onze squelettes", () => {
-    expect(kept).toHaveLength(4);
+  test("garde les huit pages redigees, sans les neuf squelettes", () => {
+    expect(kept).toHaveLength(8);
     for (const slug of STUBS) expect(kept).not.toContain(`${DOCS_URL}/${slug}`);
   });
 

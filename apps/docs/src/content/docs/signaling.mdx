@@ -1,20 +1,50 @@
 ---
 title: Signaling protocol
-description: Clients drive Lumyx over a WebSocket, exchanging offer, answer and ICE candidates as JSON envelopes.
-stub: true
+description: Plain JSON over a WebSocket, tagged with a type field. A browser drives the SFU with RTCPeerConnection and about forty lines of glue.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import CodeTabs from '@/components/code-tabs.astro';
 
-<Aside type="caution" title="Draft">
-  This page is an outline. The sections below are the intended shape; the prose is still being
-  written.
-</Aside>
+Open one WebSocket per peer on `/ws`. Every message is a JSON object with a `type` field.
 
-## Transport
+## A session
 
-## Message envelope
+```
+client                                  server
+  │  ── ws connect /ws ──────────────────►│
+  │  ◄──────────── connected {peer_id} ───│
+  │  ── join {room_id} ──────────────────►│
+  │  ◄──────── joined_room {peers[]} ─────│
+  │  ── sfu_offer {sdp} ─────────────────►│
+  │  ◄──────────── sfu_answer {sdp} ──────│
+  │  ── sfu_ice_candidate ───────────────►│   ICE + DTLS
+  │  ◄════════════ SRTP media ═══════════►│
+```
 
-## Offer and answer
+<CodeTabs
+  tabs={[
+    { label: 'client → server', code: '{ "type": "join", "room_id": "standup", "peer_id": "amara" }', lang: 'json' },
+    { label: 'server → client', code: '{ "type": "joined_room", "room_id": "standup", "peers": ["kenji"] }', lang: 'json' },
+  ]}
+/>
 
-## ICE candidates
+## Client to server
+
+| `type` | Payload | Purpose |
+|---|---|---|
+| `join` | `room_id`, `peer_id` | Enter a room |
+| `sfu_offer` | `sdp` | Publish and subscribe offer to the SFU |
+| `sfu_ice_candidate` | `candidate` | Trickle ICE toward the SFU |
+| `leave` | none | Leave the room |
+| `offer` / `answer` / `ice_candidate` | `sdp` / `candidate`, `target_peer_id` | Peer-to-peer relay path (mesh mode) |
+
+## Server to client
+
+| `type` | Payload |
+|---|---|
+| `connected` | `peer_id` assigned by the server |
+| `joined_room` | `room_id`, `peers` already present |
+| `peer_joined` / `peer_left` | `peer_id` |
+| `sfu_answer` | `sdp` |
+| `sfu_ice_candidate` | `candidate` |
+| `error` | `message` |

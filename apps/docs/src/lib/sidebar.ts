@@ -5,6 +5,9 @@ import order from './sidebar.json';
  * ouvre une section, les autres sont des slugs de src/content/docs. Les squelettes (`stub: true`)
  * y restent — la nav doit rester complete.
  */
+/** Le groupe des pages a venir : replie dans la sidebar, chaque entree badgee. */
+export const COMING_SOON = 'Coming soon';
+
 export type SidebarGroup = { label: string; items: string[] };
 
 export function sidebarGroups(pages: string[] = order.pages): SidebarGroup[] {

@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
 import { markdown } from './src/lib/markdown';
-import { sidebarGroups } from './src/lib/sidebar';
+import { COMING_SOON, sidebarGroups } from './src/lib/sidebar';
 import { sitemapOptions } from './src/lib/sitemap';
 import { REPO } from './src/lib/site-data';
 import { stubSlugs } from './src/lib/stubs';
@@ -27,18 +27,24 @@ export default defineConfig({
       title: 'Lumyx docs',
       titleDelimiter: '—',
       description:
-        'Run, self-host and observe a Lumyx SFU: quickstart, deployment, the six media-path metrics and the REST API.',
+        'Run, self-host and drive a Lumyx SFU: quickstart, deployment, configuration, the signaling protocol and the endpoints.',
       favicon: '/favicon.svg',
       head: [
         { tag: 'link', attrs: { rel: 'icon', href: '/favicon.ico', sizes: '32x32' } },
         { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } },
       ],
       social: [{ icon: 'github', label: 'GitHub', href: REPO }],
-      // Les squelettes portent le badge « Soon » de la maquette Docs v3.
+      // « Coming soon » regroupe ce qui n'existe pas encore : replie par defaut, chaque entree
+      // badgee (« Soon » pour un squelette, « Planned » pour une page qui decrit le futur).
       sidebar: sidebarGroups().map((group) => ({
         label: group.label,
+        collapsed: group.label === COMING_SOON,
         items: group.items.map((slug) =>
-          stubs.includes(slug) ? { slug, badge: { text: 'Soon', class: 'lumyx-soon' } } : slug,
+          stubs.includes(slug)
+            ? { slug, badge: { text: 'Soon', class: 'lumyx-soon' } }
+            : group.label === COMING_SOON
+              ? { slug, badge: { text: 'Planned', class: 'lumyx-soon' } }
+              : slug,
         ),
       })),
       editLink: { baseUrl: 'https://github.com/lumyx-dev/website/edit/main/apps/docs/' },

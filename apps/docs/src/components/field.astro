@@ -1,0 +1,14 @@
+---
+// Un champ de reference : nom, type, description. `nested` decale les sous-champs.
+interface Props {
+  name: string;
+  type: string;
+  nested?: boolean;
+}
+const { name, type, nested = false } = Astro.props;
+---
+
+<div class:list={['lumyx-field', nested && 'lumyx-field-nested']}>
+  <p class="lumyx-field-name"><code>{name}</code><span>{type}</span></p>
+  <div class="lumyx-field-body"><slot /></div>
+</div>

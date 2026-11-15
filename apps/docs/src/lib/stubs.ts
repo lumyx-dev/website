@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
- * Les onze squelettes portent `stub: true` en frontmatter. Leur corps n'est qu'un avertissement et
+ * Les squelettes portent `stub: true` en frontmatter. Leur corps n'est qu'un avertissement et
  * des titres vides : ils restent dans la nav, mais sortent du sitemap et recoivent un `noindex`
  * (src/route-middleware.ts). Le champ s'appelait `draft` sous Fumadocs ; Starlight reserve ce nom
  * a des pages exclues du build de production, ce qui retirerait les squelettes de la nav.

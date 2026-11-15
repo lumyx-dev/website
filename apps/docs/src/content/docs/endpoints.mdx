@@ -1,0 +1,22 @@
+---
+title: Endpoints
+description: "The SFU serves four routes on one port: the test client, the WebSocket, a health check and the counters."
+---
+
+import CodeTabs from '@/components/code-tabs.astro';
+
+| Route | What it does |
+|---|---|
+| `GET /` | Built-in test client, mounted only when `SFU_SERVE_TEST_CLIENT` is on |
+| `GET /ws` | WebSocket signaling, one connection per peer. See [Signaling protocol](/signaling) |
+| `GET /health` | Status and running version |
+| `GET /metrics` | Cumulative counters, as JSON. See [GET /metrics](/metrics) |
+
+## GET /health
+
+<CodeTabs
+  tabs={[
+    { label: 'response', code: '{ "status": "ok", "version": "0.1.0" }', lang: 'json' },
+    { label: 'request', code: 'curl -k https://localhost:3000/health' },
+  ]}
+/>
