@@ -1,0 +1,38 @@
+---
+/**
+ * Background A: wide blurred bands of light sliding on a diagonal: indigo streams, and one
+ * red band that cuts out now and then (a lost packet). CSS only, still under reduced motion.
+ * The centre is masked so the headline stays on a calm ground. Decorative.
+ */
+interface Props {
+  /** Dimmer, for the secondary panels. */
+  calm?: boolean;
+  class?: string;
+}
+const { calm = false, class: className } = Astro.props;
+
+const BANDS = [
+  { left: '6%', width: 180, delay: 0, opacity: 0.55 },
+  { left: '28%', width: 120, delay: -3, opacity: 0.4 },
+  { left: '50%', width: 220, delay: -7, opacity: 0.55 },
+  { left: '74%', width: 100, delay: -10, opacity: 0.35 },
+];
+const MASK =
+  'mask-image: radial-gradient(ellipse 48% 42% at 50% 48%, transparent 0%, #000 80%); -webkit-mask-image: radial-gradient(ellipse 48% 42% at 50% 48%, transparent 0%, #000 80%)';
+---
+
+<div aria-hidden="true" class:list={['pointer-events-none absolute inset-0', className]} style={MASK}>
+  <div class:list={['absolute inset-0 blur-[28px]', calm && 'opacity-50']}>
+    {
+      BANDS.map((b) => (
+        <span
+          class="v2-band absolute -top-[30%] h-[160%] rotate-[32deg] rounded-pill bg-linear-to-b from-transparent via-accent to-transparent"
+          style={`left:${b.left};width:${b.width}px;opacity:${b.opacity};animation-delay:${b.delay}s`}
+        />
+      ))
+    }
+    <span
+      class="v2-band v2-band-cut absolute -top-[30%] h-[160%] rotate-[32deg] rounded-pill bg-linear-to-b from-transparent via-danger-solid to-transparent"
+      style="left:62%;width:90px;opacity:0.5;animation-delay:-5s"></span>
+  </div>
+</div>

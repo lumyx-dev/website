@@ -1,0 +1,357 @@
+---
+import Base from '@/layouts/base.astro';
+import { LumyxMark, cn } from '@lumyx/ui';
+import { MobileNav } from '@/components/site/mobile-nav';
+import { IncidentWindow } from '@/components/site/incident-window';
+import { StartTerminal } from '@/components/site/start-terminal';
+import JitterTerrain from '@/components/site/jitter-terrain.astro';
+import LightBands from '@/components/site/light-bands.astro';
+import GithubIcon from '@/components/site/github-icon.astro';
+import { ThemeToggle } from '@/components/site/theme-toggle';
+import { REPO } from '@/lib/site-data';
+import {
+  HERO_FACTS,
+  LICENSE,
+  METRICS_JSON,
+  NEXT,
+  README_QUICKSTART,
+  TODAY_FACTS,
+  TODAY_LIST,
+  V2_FAQ,
+  V2_FOOTER,
+  V2_NAV,
+  V2_START,
+  V2_STEPS,
+  V2_VERSION,
+} from '@/lib/v2-data';
+
+/**
+ * Landing v2 — exploration. Follows the site theme: in light, a light page with dark rounded panels;
+ * in dark, a near-black page with raised, bordered panels. Panels (hero, quickstart, close) carrying
+ * a jitter terrain in the hero and light bands in the quickstart and close; @lumyx/ui colours only (indigo accent, red for lost packets).
+ * Not linked from the site, `noindex`.
+ */
+
+const WRAP = 'mx-auto w-full max-w-[1200px] px-4 min-[640px]:px-6';
+const RHYTHM = 'py-24 min-[960px]:py-32';
+const PANEL =
+  'dark relative isolate overflow-hidden rounded-xl border border-transparent bg-page text-body dark:border-stroke dark:bg-card';
+const EYEBROW = 'text-14 font-semibold text-accent-text';
+const H2 = 'm-0 text-[32px] font-semibold leading-[1.05] tracking-[-0.035em] text-strong text-balance min-[640px]:text-[44px]';
+const LEAD = 'm-0 text-[18px] leading-7 text-muted text-pretty';
+
+const BTN =
+  'inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-pill border px-5 text-16 font-semibold no-underline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:no-underline active:translate-y-0 active:scale-[0.98]';
+const BTN_PRIMARY = `${BTN} border-transparent bg-accent text-on-accent hover:bg-accent-hover hover:text-on-accent`;
+const BTN_GHOST = `${BTN} border-stroke bg-card text-strong hover:border-faint hover:text-strong`;
+const NAVLINK = 'inline-flex min-h-11 items-center text-14 text-muted no-underline transition-colors duration-500 hover:text-strong hover:no-underline';
+
+---
+
+<Base
+  title="Lumyx · The WebRTC SFU that tells you why a call broke"
+  description="Lumyx is an open source WebRTC SFU written in Rust. Forwarding works today; next, it reads every RTCP report so a frozen call comes with its cause."
+>
+  <meta slot="head" name="robots" content="noindex" />
+
+  <div class="min-h-dvh overflow-x-clip bg-card text-body dark:bg-page">
+    <a
+      href="#main"
+      class="absolute -top-12 left-4 z-[80] rounded-xs bg-strong px-3 py-2 font-semibold text-card no-underline focus:top-4 hover:text-card"
+    >
+      Skip to content
+    </a>
+
+    {/* Nav: a plain strip above the hero panel */}
+    <header class="sticky top-0 z-50 bg-card/85 backdrop-blur-[16px] dark:bg-page/85">
+      <nav aria-label="Main" class={cn(WRAP, 'flex h-16 items-center gap-8')}>
+        <a href="/v2#top" class="flex min-h-11 items-center gap-2 text-strong no-underline hover:text-strong hover:no-underline">
+          <LumyxMark size={20} className="text-accent" />
+          <span class="text-16 font-semibold tracking-[-0.02em]">Lumyx</span>
+        </a>
+        <div class="hidden gap-6 min-[960px]:flex">
+          {V2_NAV.map((n) => <a href={n.href} class={NAVLINK}>{n.label}</a>)}
+        </div>
+        <span class="flex-1"></span>
+        <ThemeToggle client:load />
+        <a href={REPO} class={cn(NAVLINK, 'hidden gap-2 min-[960px]:inline-flex')}>
+          <GithubIcon size={16} />
+          GitHub
+        </a>
+        <a href="/v2#start" class={cn(BTN_GHOST, 'hidden min-h-10 px-4 text-14 min-[640px]:inline-flex')}>Quickstart</a>
+        <MobileNav client:idle links={V2_NAV} />
+      </nav>
+    </header>
+
+    <main id="main">
+      {/* Hero */}
+      <section id="top" class="scroll-mt-16 px-2 pb-2 min-[640px]:px-4" data-enter>
+        <div class={cn(PANEL, 'flex min-h-[calc(100svh-72px)] items-center')}>
+          <JitterTerrain ruler horizon={0.62} />
+          <div class={cn(WRAP, 'relative flex flex-col items-center gap-8 py-24 text-center')}>
+            <ul class="v2-enter m-0 flex list-none flex-wrap justify-center gap-2 p-0">
+              {
+                HERO_FACTS.map((f, i) => (
+                  <li
+                    class={cn(
+                      'sl-num rounded-pill border px-3 py-1 text-14',
+                      i === 0 ? 'border-accent-border bg-accent-tint font-semibold text-accent-text' : 'border-stroke text-muted',
+                    )}
+                  >
+                    {f}
+                  </li>
+                ))
+              }
+            </ul>
+            <h1
+              class="v2-enter m-0 max-w-[900px] text-[40px] font-semibold leading-[1.02] tracking-[-0.045em] text-strong text-balance min-[640px]:text-[56px] min-[1100px]:text-[72px]"
+              style="animation-delay: 80ms"
+            >
+              The WebRTC SFU that tells you why a call broke
+            </h1>
+            <p class={cn(LEAD, 'v2-enter max-w-[620px]')} style="animation-delay: 160ms">
+              Open source and written in Rust. Lumyx forwards every packet today; next, it reads every RTCP report so a
+              frozen tile arrives with its cause.
+            </p>
+            <div class="v2-enter flex flex-wrap justify-center gap-3" style="animation-delay: 240ms">
+              <a href="/v2#start" class={BTN_PRIMARY}>Run it locally</a>
+              <a href={REPO} class={BTN_GHOST}>
+                <GithubIcon />
+                View on GitHub
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Today */}
+      <section id="today" class={cn(WRAP, RHYTHM, 'scroll-mt-16')}>
+        <div class="grid items-start gap-12 min-[960px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          <div class="flex flex-col gap-6">
+            <span class={EYEBROW}>Today · alpha {V2_VERSION}</span>
+            <h2 class={H2}>Forwarding works end to end</h2>
+            <p class={LEAD}>
+              One Rust process takes the WebSocket, terminates every peer's media and forwards each track to the
+              subscribers who asked for it, without transcoding.
+            </p>
+            <ul class="m-0 flex list-none flex-col gap-3 p-0">
+              {
+                TODAY_LIST.map((t) => (
+                  <li class="flex items-center gap-3 text-16 text-strong">
+                    <span class="flex size-5 flex-none items-center justify-center rounded-pill bg-accent-tint">
+                      <svg width="12" height="12" viewBox="0 0 256 256" aria-hidden="true" class="fill-none stroke-accent-text">
+                        <path d="M40 136l56 56 120-128" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                    {t}
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+
+          <div class="dark overflow-hidden rounded-xl border border-stroke bg-page text-body shadow-lg dark:bg-card">
+            <div class="flex items-center gap-3 border-b border-hairline px-6 py-4 text-14">
+              <span class="rounded-xs bg-accent-tint px-2 py-0.5 text-12 font-semibold text-accent-text">GET</span>
+              <span class="sl-num text-strong">/metrics</span>
+              <span class="flex-1"></span>
+              <span class="flex items-center gap-2 text-12 text-muted">
+                <span class="size-2 rounded-pill bg-ok-solid"></span>200 OK
+              </span>
+            </div>
+            <div class="sl-num sl-scroll flex flex-col gap-1 overflow-x-auto p-6 text-14 leading-6 [&>span]:whitespace-nowrap">
+              <span class="text-muted">{'{'}</span>
+              {
+                METRICS_JSON.map(([k, v], i) => (
+                  <span class="pl-6">
+                    <span class="text-accent-text">{k}</span>
+                    <span class="text-muted">: </span>
+                    <span class="text-strong">{v}</span>
+                    {i < METRICS_JSON.length - 1 && <span class="text-muted">,</span>}
+                  </span>
+                ))
+              }
+              <span class="pl-6">
+                <span class="text-accent-text">"packet_drops"</span><span class="text-muted">: {'{'} </span>
+                <span class="text-danger">"egress_queue"</span><span class="text-muted">: {'{'} "video": </span>
+                <span class="text-danger">37</span><span class="text-muted"> {'}'} {'}'}</span>
+              </span>
+              <span class="text-muted">{'}'}</span>
+            </div>
+          </div>
+        </div>
+
+        <dl class="m-0 mt-16 grid grid-cols-2 border-y border-hairline min-[960px]:grid-cols-4">
+          {
+            TODAY_FACTS.map((f, i) => (
+              <div
+                class={cn(
+                  'flex flex-col-reverse gap-1 py-8 pr-6',
+                  i % 2 === 1 && 'pl-6 border-l border-hairline',
+                  i === 2 && 'min-[960px]:pl-6 min-[960px]:border-l min-[960px]:border-hairline max-[959px]:border-t max-[959px]:border-hairline',
+                  i === 3 && 'max-[959px]:border-t max-[959px]:border-hairline',
+                )}
+              >
+                <dt class="text-14 leading-5 text-muted">{f.k}</dt>
+                <dd class="sl-num m-0 text-[32px] font-semibold leading-9 tracking-[-0.03em] text-strong">{f.v}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+
+      {/* Next */}
+      <section id="next" class="scroll-mt-16 bg-page dark:bg-card">
+        <div class={cn(WRAP, RHYTHM, 'flex flex-col gap-16')}>
+          <div class="grid items-end gap-8 min-[960px]:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
+            <div class="flex flex-col gap-6">
+              <span class={EYEBROW}>Roadmap</span>
+              <h2 class={H2}>Next: a frozen tile with its cause next to it</h2>
+            </div>
+            <p class={LEAD}>
+              The collector reads RTCP off the packets the SFU already forwards. The incident view below is the screen it
+              will feed; its numbers are demo data until it ships.
+            </p>
+          </div>
+
+          <ol class="m-0 grid list-none gap-8 p-0 min-[960px]:grid-cols-3">
+            {
+              NEXT.map((n) => (
+                <li class="flex flex-col gap-3 border-t border-stroke pt-6">
+                  <span class="flex items-center gap-3 text-14">
+                    <span class={cn('size-2.5 rounded-pill', n.state === 'next' ? 'bg-accent' : 'border border-faint')} />
+                    <span class="sl-num text-faint">{n.step}</span>
+                    <span class={n.state === 'next' ? 'font-semibold text-accent-text' : 'text-muted'}>
+                      {n.state === 'next' ? 'Next milestone' : 'Planned'}
+                    </span>
+                  </span>
+                  <h3 class="m-0 text-20 font-semibold text-strong">{n.title}</h3>
+                  <p class="m-0 text-16 leading-6 text-muted">{n.body}</p>
+                </li>
+              ))
+            }
+          </ol>
+
+          <IncidentWindow client:visible />
+        </div>
+      </section>
+
+      {/* Quickstart */}
+      <section id="start" class="scroll-mt-16 px-2 py-2 min-[640px]:px-4">
+        <div class={PANEL}>
+          <LightBands calm />
+          <div
+            class={cn(WRAP, RHYTHM, 'relative grid grid-cols-1 items-center gap-12 min-[960px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] [&>*]:min-w-0')}
+          >
+            <div class="flex flex-col gap-6">
+              <span class={EYEBROW}>Quickstart</span>
+              <h2 class={H2}>Two browser tabs, one forwarder</h2>
+              <ol class="m-0 flex list-none flex-col gap-4 p-0">
+                {
+                  V2_STEPS.map((t, i) => (
+                    <li class="flex gap-3 text-16 leading-6 text-body">
+                      <span class="sl-num flex size-6 flex-none items-center justify-center rounded-pill border border-stroke text-12 font-semibold text-strong">
+                        {i + 1}
+                      </span>
+                      {t}
+                    </li>
+                  ))
+                }
+              </ol>
+              <a href={README_QUICKSTART} class="inline-flex min-h-11 items-center self-start text-16 font-medium text-accent-text">
+                Full quick start in the README →
+              </a>
+            </div>
+            <StartTerminal client:visible start={V2_START} />
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" class={cn(WRAP, RHYTHM, 'grid scroll-mt-16 gap-12 min-[960px]:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]')}>
+        <div class="flex flex-col gap-4">
+          <h2 class={H2}>Questions</h2>
+          <p class="m-0 text-16 leading-6 text-muted">
+            Missing one? Open an <a href={`${REPO}/issues`} class="text-accent-text">issue on GitHub</a>.
+          </p>
+        </div>
+        <div>
+          {
+            V2_FAQ.map((f, i) => (
+              <details name="faq" open={i === 0} class="group border-b border-hairline">
+                <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 py-6 text-[18px] font-semibold leading-7 text-strong [&::-webkit-details-marker]:hidden">
+                  {f.q}
+                  <span class="flex size-8 flex-none items-center justify-center rounded-pill border border-stroke transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-open:rotate-45">
+                    <svg width="14" height="14" viewBox="0 0 256 256" aria-hidden="true" class="fill-none stroke-strong">
+                      <path d="M40 128h176M128 40v176" stroke-width="20" stroke-linecap="round" />
+                    </svg>
+                  </span>
+                </summary>
+                <p class="m-0 pb-6 pr-12 text-16 leading-6 text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      {/* Close */}
+      <section class="px-2 pb-2 min-[640px]:px-4">
+        <div class={PANEL}>
+          <LightBands calm />
+          <div class={cn(WRAP, 'relative flex flex-col items-center gap-6 py-32 text-center')}>
+            <h2 class={cn(H2, 'max-w-[720px]')}>Run it against your own calls</h2>
+            <p class={cn(LEAD, 'max-w-[560px]')}>
+              Free to self-host under the {LICENSE}. No account, and nothing about your calls is sent to us.
+            </p>
+            <div class="flex flex-wrap justify-center gap-3">
+              <a href={README_QUICKSTART} class={BTN_PRIMARY}>Read the quick start</a>
+              <a href={REPO} class={BTN_GHOST}>
+                <GithubIcon />
+                Star on GitHub
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class={cn(WRAP, 'flex flex-col gap-12 py-12')}>
+      <div class="grid grid-cols-2 gap-8 min-[960px]:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+        <div class="col-span-2 flex flex-col gap-2 min-[960px]:col-span-1">
+          <span class="flex items-center gap-2 text-16 font-semibold text-strong">
+            <LumyxMark size={16} className="text-accent" />
+            Lumyx
+          </span>
+          <span class="max-w-[260px] text-14 leading-5 text-muted">The WebRTC SFU that tells you why a call broke.</span>
+        </div>
+        {
+          V2_FOOTER.map((fc) => (
+            <div class="flex flex-col gap-1">
+              <span class="mb-2 text-14 font-semibold text-strong">{fc.t}</span>
+              {fc.links.map((l) => (
+                <a href={l.href} class={NAVLINK}>{l.label}</a>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+      <div class="flex flex-wrap justify-between gap-3 border-t border-hairline pt-6 text-12 text-muted">
+        <span>{LICENSE} · © 2026 Mathieu Chambaud</span>
+        <span class="sl-num">lumyx.dev · alpha {V2_VERSION}</span>
+      </div>
+    </footer>
+
+    {/* Giant wordmark: the mark and the name, cropped by the page edge. Decorative. */}
+    <div aria-hidden="true" class="pointer-events-none select-none overflow-hidden">
+      <div
+        class={cn(
+          WRAP,
+          'flex translate-y-[22%] items-center justify-center gap-[0.06em] text-[24vw] font-semibold leading-[0.8] tracking-[-0.06em] min-[1440px]:text-[340px]',
+        )}
+      >
+        <LumyxMark size={256} className="h-[0.72em] w-auto flex-none text-accent opacity-25" />
+        <span class="bg-linear-to-b from-strong/15 to-transparent bg-clip-text pb-[0.1em] text-transparent">Lumyx</span>
+      </div>
+    </div>
+  </div>
+</Base>
