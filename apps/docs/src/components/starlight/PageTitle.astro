@@ -1,11 +1,16 @@
 ---
-// Remplace le PageTitle de Starlight (maquette Docs v3) : fil d'Ariane Docs › section › page,
-// titre en degrade, chapo, puis la version et le lien d'edition. L'id `_top` est celui que
-// Starlight attend.
+// Remplace le PageTitle de Starlight.
+// - Accueil : un hero centre (tranche du terrain de jitter de la landing, titre, chapo, deux
+//   boutons).
+// - Autres pages : fil d'Ariane, titre, chapo, puis la version, « Copy page » (la source de la
+//   page, pour un LLM) et le lien d'edition.
+// L'id `_top` est celui que Starlight attend.
 import { Icon } from '@astrojs/starlight/components';
+import TerrainStrip from '@/components/terrain-strip.astro';
 import { VERSION } from '@/lib/site-data';
 
-const { entry, sidebar, editUrl } = Astro.locals.starlightRoute;
+const { entry, sidebar, editUrl, id } = Astro.locals.starlightRoute;
+const isHome = id === '' || id === 'index';
 type SidebarEntry = (typeof sidebar)[number];
 
 function hasCurrent(e: SidebarEntry): boolean {
@@ -13,29 +18,68 @@ function hasCurrent(e: SidebarEntry): boolean {
 }
 const section = sidebar.find((e) => e.type === 'group' && hasCurrent(e))?.label;
 const crumbs = ['Docs', section].filter(Boolean) as string[];
+
+// « Copy page » : la source MDX, sans les imports ni les commentaires JSX.
+const source = `# ${entry.data.title}\n\n${entry.data.description ? `${entry.data.description}\n\n` : ''}${(entry.body ?? '')
+  .split('\n')
+  .filter((l) => !/^import\s/.test(l))
+  .join('\n')
+  .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+  .replace(/\n{3,}/g, '\n\n')
+  .trim()}\n`;
 ---
 
-<nav aria-label="Breadcrumb" class="lumyx-crumb">
-  {
-    crumbs.map((c) => (
-      <>
-        <span>{c}</span>
-        <Icon name="right-caret" class="lumyx-crumb-sep" />
-      </>
-    ))
-  }
-  <span class="lumyx-crumb-current" aria-current="page">{entry.data.title}</span>
-</nav>
-<h1 id="_top" class="lumyx-title">{entry.data.title}</h1>
-{entry.data.description && <p class="lumyx-lead">{entry.data.description}</p>}
-<p class="lumyx-meta">
-  <span class="sl-num">Lumyx {VERSION}</span>
-  {
-    editUrl && (
-      <>
-        <span aria-hidden="true">·</span>
-        <a href={editUrl}>Edit on GitHub</a>
-      </>
-    )
-  }
-</p>
+{
+  isHome ? (
+    <header class="lumyx-home-hero">
+      <TerrainStrip />
+      <h1 id="_top">{entry.data.title}</h1>
+      {entry.data.description && <p class="lumyx-lead">{entry.data.description}</p>}
+      <div class="lumyx-home-ctas">
+        <a class="lumyx-btn lumyx-btn-primary" href="/quickstart">Start the quickstart</a>
+        <a class="lumyx-btn" href="/self-hosting">Self-host it</a>
+      </div>
+    </header>
+  ) : (
+    <>
+      <nav aria-label="Breadcrumb" class="lumyx-crumb">
+        {crumbs.map((c) => (
+          <>
+            <span>{c}</span>
+            <Icon name="right-caret" class="lumyx-crumb-sep" />
+          </>
+        ))}
+        <span class="lumyx-crumb-current" aria-current="page">{entry.data.title}</span>
+      </nav>
+      <h1 id="_top" class="lumyx-title">{entry.data.title}</h1>
+      {entry.data.description && <p class="lumyx-lead">{entry.data.description}</p>}
+      <div class="lumyx-meta">
+        <span class="lumyx-version">alpha {VERSION}</span>
+        <span class="lumyx-meta-gap" />
+        <button type="button" class="lumyx-btn lumyx-btn-sm" data-copy-page>
+          <span aria-live="polite">Copy page</span>
+        </button>
+        {editUrl && (
+          <a class="lumyx-btn lumyx-btn-sm" href={editUrl}>
+            Edit on GitHub
+          </a>
+        )}
+        <template data-page-source>{source}</template>
+      </div>
+    </>
+  )
+}
+
+<script>
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-copy-page]');
+    if (!btn) return;
+    const source = document.querySelector<HTMLTemplateElement>('template[data-page-source]')?.content.textContent ?? '';
+    const label = btn.querySelector('span')!;
+    void navigator.clipboard
+      ?.writeText(source)
+      .then(() => (label.textContent = 'Copied as Markdown'))
+      .catch(() => (label.textContent = 'Copy unavailable'));
+    setTimeout(() => (label.textContent = 'Copy page'), 1800);
+  });
+</script>

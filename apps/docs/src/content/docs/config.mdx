@@ -1,18 +1,43 @@
 ---
 title: Configuration
-description: Lumyx starts with no config file; every setting has a default, an environment variable and a file key.
-stub: true
+description: Every setting is an environment variable, and every default reproduces the behaviour of a plain cargo run.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+There is no config file. Set variables in the environment of the process, or in `.env` with the
+[self-hosted](/self-hosting) setup.
 
-<Aside type="caution" title="Draft">
-  This page is an outline. The sections below are the intended shape; the prose is still being
-  written.
-</Aside>
+## Server
 
-## Precedence
+| Variable | Default | What it does |
+|---|---|---|
+| `SFU_BIND_ADDR` | `0.0.0.0:3000` | HTTPS listen address |
+| `SFU_TLS` | `true` | Terminate TLS in-process. Set to `false` behind a reverse proxy that does it |
+| `SFU_CERT_PATH` | `localhost+1.pem` | TLS certificate (PEM) |
+| `SFU_KEY_PATH` | `localhost+1-key.pem` | TLS private key (PEM) |
+| `SFU_SERVE_TEST_CLIENT` | `true` | Serve the bundled test client on `/`. Turn it off in production |
+| `SFU_LOG` | `debug` | `tracing-subscriber` filter |
 
-## Environment variables
+## Media
 
-## File reference
+| Variable | Default | What it does |
+|---|---|---|
+| `SFU_ICE_HOST` | `127.0.0.1` | Host advertised in local ICE candidates: the server's public IP in production |
+| `SFU_UDP_PORT_MIN` / `SFU_UDP_PORT_MAX` | unset | UDP range for media sockets, one port per peer. Unset: ephemeral ports. Required to publish the SFU from a container |
+
+## Telemetry
+
+| Variable | Default | What it does |
+|---|---|---|
+| `SFU_DATABASE_URL` | unset | Postgres URL. When set, telemetry is persisted; when unset, nothing changes |
+| `SFU_INSTANCE_NAME` | hostname | Instance label attached to persisted telemetry |
+| `SFU_REGION` | `local` | Region label attached to persisted telemetry |
+| `SFU_SAMPLE_INTERVAL` | `1` | Sampling interval, in seconds |
+| `SFU_RETENTION_RAW` | `86400` | Retention of raw samples, in seconds |
+| `SFU_RETENTION_ROLLUP` | `2592000` | Retention of the 1-minute rollup and events, in seconds |
+| `SFU_TELEMETRY_QUEUE` | `256` | Bounded queue depth before samples are dropped |
+
+## Example
+
+```bash
+SFU_LOG=sfu=debug,str0m=info SFU_SERVE_TEST_CLIENT=false cargo run --release
+```

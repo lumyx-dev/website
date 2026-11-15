@@ -1,0 +1,59 @@
+---
+title: GET /metrics
+description: Cumulative counters since startup, as JSON. The same values are written to telemetry as per-second deltas when Postgres is configured.
+tableOfContents: false
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import ApiLayout from '@/components/api-layout.astro';
+import CodeTabs from '@/components/code-tabs.astro';
+import Field from '@/components/field.astro';
+
+export const RESPONSE = `{
+  "rooms": 1,
+  "peers": 2,
+  "metrics": {
+    "rtp_packets_forwarded": 48210,
+    "bytes_forwarded": 31877342,
+    "keyframe_requests": 12,
+    "peers_connected": 4,
+    "peers_disconnected": 2,
+    "telemetry_entries_dropped": 0,
+    "packet_drops": {
+      "totals": {
+        "ingress_queue": { "audio": 0, "video": 0 },
+        "unknown_pt":    { "audio": 0, "video": 0 },
+        "egress_queue":  { "audio": 0, "video": 37 }
+      },
+      "peers": {
+        "4f1c…": { "egress_queue": { "audio": 0, "video": 37 } }
+      }
+    }
+  }
+}`;
+
+<ApiLayout method="GET" path="https://localhost:3000/metrics">
+  <Field name="rooms" type="integer">Rooms with at least one connected peer.</Field>
+  <Field name="peers" type="integer">Peers connected right now.</Field>
+  <Field name="metrics.rtp_packets_forwarded" type="integer">RTP packets written, counted once per subscriber write.</Field>
+  <Field name="metrics.bytes_forwarded" type="integer">Bytes written to subscribers.</Field>
+  <Field name="metrics.keyframe_requests" type="integer">Keyframe requests routed to a publisher as a PLI on the matching m-line.</Field>
+  <Field name="metrics.peers_connected · peers_disconnected" type="integer">Connections and disconnections since startup.</Field>
+  <Field name="metrics.telemetry_entries_dropped" type="integer">Telemetry samples dropped because the queue was full.</Field>
+  <Field name="metrics.packet_drops" type="object">Packets the SFU itself dropped, split by audio and video, in `totals` and per connected peer. A departing peer's drops stay in `totals`.</Field>
+  <Field name="ingress_queue" type="audio · video" nested>Counted against the sender: its queue to the forwarding engine was full.</Field>
+  <Field name="unknown_pt" type="audio · video" nested>Counted against the sender: its payload type is not in the codec config.</Field>
+  <Field name="egress_queue" type="audio · video" nested>Counted against the receiver: its write queue was full.</Field>
+
+  <Fragment slot="example">
+    <CodeTabs
+      tabs={[
+        { label: 'response', code: RESPONSE, lang: 'json' },
+        { label: 'request', code: 'curl -k https://localhost:3000/metrics' },
+      ]}
+    />
+    <Aside type="note" title="Not public in self-hosting">
+      With the self-hosted setup, `/metrics` stays on the Compose network.
+    </Aside>
+  </Fragment>
+</ApiLayout>

@@ -1,0 +1,27 @@
+---
+// Accueil de la doc : la carte « Run your first SFU », avec les vraies commandes.
+import CodeTabs from './code-tabs.astro';
+
+const CARGO = `git clone https://github.com/lumyx-dev/sfu-core && cd sfu-core
+mkcert -install && mkcert localhost 127.0.0.1
+cargo run --release
+# open https://localhost:3000 in two tabs`;
+const COMPOSE = `git clone https://github.com/lumyx-dev/self-hosted.git lumyx && cd lumyx
+cp .env.example .env
+docker compose up -d
+# clients connect to wss://$SFU_DOMAIN/ws`;
+---
+
+<section class="not-content lumyx-first">
+  <div class="lumyx-first-text">
+    <h2>Run your first SFU</h2>
+    <p>Three commands, then open two browser tabs: the test client sends your camera through the forwarder and back.</p>
+    <a href="/quickstart">Walk through it step by step →</a>
+  </div>
+  <CodeTabs
+    tabs={[
+      { label: 'cargo', code: CARGO },
+      { label: 'docker compose', code: COMPOSE },
+    ]}
+  />
+</section>

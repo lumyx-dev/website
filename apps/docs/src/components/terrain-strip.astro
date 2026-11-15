@@ -1,0 +1,120 @@
+---
+// Le terrain de jitter de la landing v2, en tranche calme, au-dessus du titre de l'accueil.
+// Canvas 2D, couleurs lues dans les tokens a chaque image (le theme peut basculer). Image fixe
+// sous reduced-motion, pause hors ecran. Decoratif.
+const FADE =
+  'mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent)';
+---
+
+<canvas data-terrain-strip aria-hidden="true" class="lumyx-terrain" style={FADE}></canvas>
+
+<script>
+  type Spike = { x: number; z: number; a: number; life: number };
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function mount(c: HTMLCanvasElement) {
+    const g = c.getContext('2d');
+    if (!g) return;
+    let w = 0;
+    let h = 0;
+    let t = 0;
+    const spikes: Spike[] = [];
+    const fit = () => {
+      const r = c.getBoundingClientRect();
+      const d = Math.min(2, window.devicePixelRatio || 1);
+      w = r.width;
+      h = r.height;
+      c.width = Math.round(w * d);
+      c.height = Math.round(h * d);
+      g.setTransform(d, 0, 0, d, 0, 0);
+    };
+    fit();
+    new ResizeObserver(() => {
+      fit();
+      if (reduced) draw();
+    }).observe(c);
+
+    const COLS = 60;
+    const ROWS = 14;
+    const X0 = -16;
+    const X1 = 16;
+    const Z0 = 2.2;
+    const Z1 = 12;
+    const height = (x: number, z: number) => {
+      let y = Math.sin(x * 0.5 + t * 0.8) * 0.2 + Math.sin(z * 0.7 - t * 0.6) * 0.18 + Math.sin((x + z) * 0.3 + t * 0.35) * 0.2;
+      for (const s of spikes) y += s.a * Math.exp(-((x - s.x) ** 2 + (z - s.z) ** 2) / 0.35) * Math.sin(Math.PI * s.life);
+      return y;
+    };
+    const proj = (x: number, y: number, z: number): [number, number] => {
+      const F = h * 0.9;
+      return [w / 2 + (x * F) / z, h * 0.05 + (((2.4 - y) * F) / z) * 0.55];
+    };
+
+    function draw() {
+      const css = getComputedStyle(c);
+      const accent = css.getPropertyValue('--accent').trim();
+      const danger = css.getPropertyValue('--danger-solid').trim();
+      g!.clearRect(0, 0, w, h);
+      g!.strokeStyle = accent;
+      g!.lineWidth = 1;
+      for (let j = ROWS; j >= 0; j--) {
+        const z = Z0 + ((Z1 - Z0) * j) / ROWS;
+        g!.globalAlpha = 0.06 + (1 - j / ROWS) * 0.4;
+        g!.beginPath();
+        for (let i = 0; i <= COLS; i++) {
+          const x = X0 + ((X1 - X0) * i) / COLS;
+          const [px, py] = proj(x, height(x, z), z);
+          if (i) g!.lineTo(px, py);
+          else g!.moveTo(px, py);
+        }
+        g!.stroke();
+      }
+      g!.fillStyle = danger;
+      g!.shadowColor = danger;
+      g!.shadowBlur = 14;
+      for (const s of spikes) {
+        const [px, py] = proj(s.x, height(s.x, s.z), s.z);
+        g!.globalAlpha = Math.sin(Math.PI * s.life);
+        g!.beginPath();
+        g!.arc(px, py, 3, 0, Math.PI * 2);
+        g!.fill();
+      }
+      g!.shadowBlur = 0;
+      g!.globalAlpha = 1;
+    }
+
+    let seed = 5;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const step = (dt: number) => {
+      t += dt;
+      if (rnd() < dt * 0.9) spikes.push({ x: X0 + 5 + rnd() * (X1 - X0 - 10), z: Z0 + 0.5 + rnd() * 3, a: 0.9 + rnd() * 0.5, life: 0 });
+      for (let i = spikes.length - 1; i >= 0; i--) {
+        spikes[i].life += dt / 1.4;
+        if (spikes[i].life >= 1) spikes.splice(i, 1);
+      }
+    };
+    for (let i = 0; i < 90; i++) step(1 / 60);
+    if (reduced) {
+      draw();
+      return;
+    }
+    let running = false;
+    let last = 0;
+    const frame = (now: number) => {
+      if (!running) return;
+      step(Math.min(0.05, (now - last) / 1000 || 0));
+      last = now;
+      draw();
+      requestAnimationFrame(frame);
+    };
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !running) {
+        running = true;
+        last = performance.now();
+        requestAnimationFrame(frame);
+      } else if (!e.isIntersecting) running = false;
+    }).observe(c);
+  }
+
+  document.querySelectorAll<HTMLCanvasElement>('canvas[data-terrain-strip]').forEach(mount);
+</script>

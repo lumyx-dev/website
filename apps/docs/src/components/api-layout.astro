@@ -1,0 +1,17 @@
+---
+// Page de reference d'un endpoint : les champs a gauche, l'exemple (slot `example`) a droite,
+// colle en haut a l'ecran large. La methode et le chemin en tete.
+interface Props {
+  method: string;
+  path: string;
+}
+const { method, path } = Astro.props;
+---
+
+<div class="not-content lumyx-api">
+  <div class="lumyx-api-main">
+    <p class="lumyx-endpoint"><span class="lumyx-verb">{method}</span>{path}</p>
+    <div class="lumyx-fields"><slot /></div>
+  </div>
+  <div class="lumyx-api-example"><slot name="example" /></div>
+</div>

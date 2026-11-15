@@ -1,0 +1,63 @@
+---
+// Panneau de code a onglets (cargo / docker compose, requete / reponse) : toujours sombre, un
+// bouton Copy qui copie l'onglet affiche. Shiki avec `lumyxCodeTheme`, donc aucune couleur
+// litterale : la classe `dark` du conteneur bascule les tokens `--code-*`.
+import { Code } from 'astro:components';
+import { lumyxCodeTheme } from '@lumyx/ui/code-theme';
+
+interface Props {
+  tabs: { label: string; code: string; lang?: string }[];
+  class?: string;
+}
+const { tabs, class: className } = Astro.props;
+---
+
+<div class:list={['not-content dark lumyx-code', className]} data-code-tabs>
+  <div class="lumyx-code-bar" role={tabs.length > 1 ? 'tablist' : undefined}>
+    {
+      tabs.length > 1 ? (
+        tabs.map((t, i) => (
+          <button type="button" role="tab" class="lumyx-code-tab" aria-selected={i === 0 ? 'true' : 'false'} data-tab={i}>
+            {t.label}
+          </button>
+        ))
+      ) : (
+        <span class="lumyx-code-label">{tabs[0]?.label}</span>
+      )
+    }
+    <button type="button" class="lumyx-code-copy" data-copy aria-label="Copy to clipboard">
+      <span aria-live="polite">Copy</span>
+    </button>
+  </div>
+  {
+    tabs.map((t, i) => (
+      <div data-panel={i} role={tabs.length > 1 ? 'tabpanel' : undefined} hidden={i > 0}>
+        <Code code={t.code} lang={(t.lang ?? 'bash') as 'bash'} theme={lumyxCodeTheme} />
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const box = target.closest<HTMLElement>('[data-code-tabs]');
+    if (!box) return;
+    const tab = target.closest<HTMLElement>('[data-tab]');
+    if (tab) {
+      box.querySelectorAll('[data-tab]').forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+      box.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== tab.dataset.tab));
+      return;
+    }
+    const copy = target.closest<HTMLElement>('[data-copy]');
+    if (copy) {
+      const panel = [...box.querySelectorAll<HTMLElement>('[data-panel]')].find((p) => !p.hidden);
+      const label = copy.querySelector('span')!;
+      void navigator.clipboard
+        ?.writeText(panel?.innerText.trimEnd() ?? '')
+        .then(() => (label.textContent = 'Copied'))
+        .catch(() => (label.textContent = 'Select to copy'));
+      setTimeout(() => (label.textContent = 'Copy'), 1600);
+    }
+  });
+</script>

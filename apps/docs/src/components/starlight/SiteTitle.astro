@@ -1,19 +1,29 @@
 ---
-// Le wordmark Lumyx, qui renvoie vers lumyx.dev, suivi de « Docs » en retrait (maquette Docs v3).
+// Le wordmark Lumyx, qui renvoie vers lumyx.dev, suivi de « Docs » en retrait et de la version.
 import { Wordmark } from '@lumyx/ui';
 import { SITE_URL } from '@/lib/env';
+import { VERSION } from '@/lib/site-data';
 ---
 
 <a href={SITE_URL} class="site-title" aria-label="Lumyx home">
   <Wordmark />
 </a>
 <span class="site-title-docs" aria-hidden="true">Docs</span>
+<span class="lumyx-version site-title-version">alpha {VERSION}</span>
 
 <style>
   .site-title {
     display: flex;
     align-items: center;
     text-decoration: none;
+  }
+  .site-title-version {
+    margin-inline-start: 0.75rem;
+  }
+  @media (max-width: 50rem) {
+    .site-title-version {
+      display: none;
+    }
   }
   .site-title-docs {
     margin-inline-start: 0.5rem;
