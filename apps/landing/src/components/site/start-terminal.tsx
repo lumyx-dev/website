@@ -1,13 +1,15 @@
 import * as React from "react";
 import { cx } from "@/lib/cx";
-import { START, type StartKey } from "@/lib/home-data";
+import { START as HOME_START, type StartLine } from "@/lib/home-data";
 import { CopyButton } from "./copy";
 
-const KEYS = Object.keys(START) as StartKey[];
+type Start = Record<string, { label: string; lines: StartLine[] }>;
 
-/** Quickstart terminal: docker or cargo, one copy button for the active one. Always dark. */
-export function StartTerminal() {
-  const [active, setActive] = React.useState<StartKey>("docker");
+/** Quickstart terminal: one tab per install method, one copy button for the active one. Always dark. */
+export function StartTerminal({ start = HOME_START }: { start?: Start }) {
+  const KEYS = Object.keys(start);
+  const START = start;
+  const [active, setActive] = React.useState<string>(KEYS[0]);
   const lines = START[active].lines;
   const copyText = lines.filter((l) => !l.dim).map((l) => l.v).join("\n");
 

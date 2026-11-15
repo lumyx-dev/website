@@ -1,0 +1,217 @@
+---
+/**
+ * Background D: a wireframe terrain that ripples like network jitter, with red spikes for lost
+ * packets, and an optional latency ruler on the right edge.
+ *
+ * Canvas 2D, colours read from the @lumyx/ui tokens at runtime (no literal colour). Pauses off
+ * screen, renders a single still frame under reduced motion. Decorative.
+ */
+interface Props {
+  /** Softer motion and fewer spikes, for the secondary panels. */
+  calm?: boolean;
+  ruler?: boolean;
+  /** Where the far edge of the terrain sits, as a fraction of the height. */
+  horizon?: number;
+  class?: string;
+}
+const { calm = false, ruler = false, horizon = 0.6, class: className } = Astro.props;
+---
+
+<canvas
+  data-terrain
+  data-calm={calm ? '' : undefined}
+  data-ruler={ruler ? '' : undefined}
+  data-horizon={horizon}
+  aria-hidden="true"
+  class:list={['pointer-events-none absolute inset-0 block h-full w-full', className]}></canvas>
+
+<script>
+  type Spike = { x: number; z: number; a: number; life: number };
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const token = (el: Element, name: string) => getComputedStyle(el).getPropertyValue(name).trim();
+
+  function mount(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const calm = canvas.hasAttribute('data-calm');
+    const withRuler = canvas.hasAttribute('data-ruler');
+    const horizon = Number(canvas.dataset.horizon ?? 0.6);
+    const C = {
+      accent: token(canvas, '--accent'),
+      danger: token(canvas, '--danger-solid'),
+      body: token(canvas, '--text-body'),
+      faint: token(canvas, '--text-faint'),
+      text: token(canvas, '--accent-text'),
+    };
+    const font = getComputedStyle(document.body).fontFamily;
+
+    const COLS = 56;
+    const ROWS = 30;
+    const X0 = -14;
+    const X1 = 14;
+    const Z0 = 1.6;
+    const Z1 = 13;
+    const AMP = calm ? 0.6 : 1;
+
+    let w = 0;
+    let h = 0;
+    let t = 0;
+    let jitter = 18;
+    let jitterTarget = 18;
+    const spikes: Spike[] = [];
+
+    let seed = 11;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+    function resize() {
+      const r = canvas.getBoundingClientRect();
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      w = r.width;
+      h = r.height;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    const X = (i: number) => X0 + ((X1 - X0) * i) / COLS;
+    const Z = (j: number) => Z0 + ((Z1 - Z0) * j) / ROWS;
+    const height = (x: number, z: number) => {
+      let y =
+        (Math.sin(x * 0.55 + t * 0.9) * 0.22 + Math.sin(z * 0.8 - t * 0.7) * 0.2 + Math.sin((x + z) * 0.35 + t * 0.4) * 0.25) *
+        AMP;
+      for (const s of spikes) {
+        const d = (x - s.x) ** 2 + (z - s.z) ** 2;
+        y += s.a * Math.exp(-d / 0.35) * Math.sin(Math.PI * s.life);
+      }
+      return y;
+    };
+    const proj = (x: number, y: number, z: number): [number, number] => {
+      const F = h * 0.34;
+      return [w / 2 + (x * F) / z, h * horizon + ((2.2 - y) * F) / z];
+    };
+
+    function step(dt: number) {
+      t += dt * (calm ? 0.6 : 1);
+      if (rnd() < dt * (calm ? 0.5 : 1.5)) {
+        spikes.push({ x: X0 + 4 + rnd() * (X1 - X0 - 8), z: Z0 + 1 + rnd() * 6, a: 1.2 + rnd() * 0.8, life: 0 });
+      }
+      for (let i = spikes.length - 1; i >= 0; i--) {
+        spikes[i].life += dt / 1.4;
+        if (spikes[i].life >= 1) spikes.splice(i, 1);
+      }
+      if (rnd() < dt * 0.6) jitterTarget = 6 + rnd() * 44;
+      jitter += (jitterTarget - jitter) * Math.min(1, dt * 1.5);
+    }
+
+    function draw() {
+      const g = ctx!;
+      g.clearRect(0, 0, w, h);
+      g.lineWidth = 1;
+      g.strokeStyle = C.accent;
+      for (let j = ROWS; j >= 0; j--) {
+        const z = Z(j);
+        g.globalAlpha = 0.08 + (1 - j / ROWS) * 0.55;
+        g.beginPath();
+        for (let i = 0; i <= COLS; i++) {
+          const x = X(i);
+          const [px, py] = proj(x, height(x, z), z);
+          if (i) g.lineTo(px, py);
+          else g.moveTo(px, py);
+        }
+        g.stroke();
+      }
+      g.strokeStyle = C.body;
+      g.globalAlpha = 0.07;
+      for (let i = 0; i <= COLS; i += 2) {
+        const x = X(i);
+        g.beginPath();
+        for (let j = 0; j <= ROWS; j++) {
+          const z = Z(j);
+          const [px, py] = proj(x, height(x, z), z);
+          if (j) g.lineTo(px, py);
+          else g.moveTo(px, py);
+        }
+        g.stroke();
+      }
+      g.fillStyle = C.danger;
+      g.shadowColor = C.danger;
+      g.shadowBlur = 18;
+      for (const s of spikes) {
+        const [px, py] = proj(s.x, height(s.x, s.z), s.z);
+        g.globalAlpha = Math.sin(Math.PI * s.life);
+        g.beginPath();
+        g.arc(px, py, 3.5, 0, Math.PI * 2);
+        g.fill();
+      }
+      g.shadowBlur = 0;
+      if (withRuler && w >= 960) drawRuler();
+      g.globalAlpha = 1;
+    }
+
+    function drawRuler() {
+      const g = ctx!;
+      const x = w - 32;
+      const top = 96;
+      const bottom = h - 96;
+      const max = 60;
+      g.font = `500 11px ${font}`;
+      g.textAlign = 'right';
+      g.textBaseline = 'middle';
+      g.strokeStyle = C.faint;
+      g.fillStyle = C.faint;
+      for (let v = 0; v <= max; v += 2) {
+        const y = bottom - ((bottom - top) * v) / max;
+        const major = v % 10 === 0;
+        g.globalAlpha = major ? 0.7 : 0.3;
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x + (major ? 12 : 6), y);
+        g.stroke();
+        if (major) g.fillText(`${v} ms`, x - 6, y);
+      }
+      const y = bottom - ((bottom - top) * jitter) / max;
+      g.globalAlpha = 1;
+      g.fillStyle = jitter > 30 ? C.danger : C.text;
+      g.beginPath();
+      g.moveTo(x + 14, y);
+      g.lineTo(x + 22, y - 5);
+      g.lineTo(x + 22, y + 5);
+      g.closePath();
+      g.fill();
+      g.font = `600 12px ${font}`;
+      g.fillText(`jitter ${Math.round(jitter)} ms`, x - 6, y - 14);
+    }
+
+    resize();
+    new ResizeObserver(() => {
+      resize();
+      if (reduced) draw();
+    }).observe(canvas);
+
+    for (let i = 0; i < 120; i++) step(1 / 60);
+    if (reduced) {
+      draw();
+      return;
+    }
+
+    let running = false;
+    let last = 0;
+    const frame = (now: number) => {
+      if (!running) return;
+      step(Math.min(0.05, (now - last) / 1000 || 0));
+      last = now;
+      draw();
+      requestAnimationFrame(frame);
+    };
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !running) {
+        running = true;
+        last = performance.now();
+        requestAnimationFrame(frame);
+      } else if (!e.isIntersecting) running = false;
+    }).observe(canvas);
+  }
+
+  document.querySelectorAll<HTMLCanvasElement>('canvas[data-terrain]').forEach(mount);
+</script>

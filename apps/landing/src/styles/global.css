@@ -10,3 +10,26 @@
 :root {
   --font-geist-sans: 'Geist Variable';
 }
+
+/* ── Landing v2 (exploration, /v2) : couleurs 100 % @lumyx/ui, seule l'entree du hero est ajoutee. */
+/* Entrée du hero, une seule fois au chargement. */
+@keyframes v2-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@utility v2-enter {
+  animation: v2-enter 900ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+
+/* Fond A (bandes) : glissement en diagonale, et la bande rouge qui se coupe. */
+@keyframes v2-band-slide { from { translate: -60% 0; } to { translate: 60% 0; } }
+@keyframes v2-band-cut { 0%, 62% { opacity: 0.5; } 64% { opacity: 0; } 70% { opacity: 0.5; } 72% { opacity: 0; } 80%, 100% { opacity: 0.5; } }
+@utility v2-band {
+  animation: v2-band-slide 14s linear infinite;
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+@utility v2-band-cut {
+  animation: v2-band-slide 14s linear infinite, v2-band-cut 3.2s steps(1) infinite;
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
